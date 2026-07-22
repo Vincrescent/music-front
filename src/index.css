@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #FAF9F6;
+  --color-cream-dark: #F5F0E8;
+  --color-brand: #8B4513;
+  --color-brand-dark: #6B3410;
+  --color-accent: #E67E22;
+  --color-accent-dark: #D35400;
+  --color-accent-light: #FDE8D0;
+  --color-amber: #D97706;
+  --color-amber-light: #FEF3C7;
+  --color-peach: #FDEBD0;
+  --color-peach-dark: #F5CBA7;
+  --color-warm-gray: #6B5B4F;
+  --color-warm-gray-light: #A0937D;
+  --color-dark-brown: #3E2723;
+  --color-dark-section: #2C1810;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base body styles */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-cream);
+  color: #374151;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-warm-gray-light);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-warm-gray);
+}
+
+/* Toast slide-up animation */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
