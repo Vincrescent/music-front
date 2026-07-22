@@ -1,5 +1,32 @@
 import { useState, useEffect, useRef } from "react";
 import { facilities } from "../data/facilities";
+import { Wifi, Coffee, Headphones, VolumeX, Sliders, Wind, Lock, Zap, Package, Check, Sparkles } from "lucide-react";
+
+/* ── Icon Renderer Helper ── */
+function FacilityIcon({ name, className = "" }) {
+  switch (name) {
+    case "📶":
+      return <Wifi className={className} size={26} />;
+    case "☕":
+      return <Coffee className={className} size={26} />;
+    case "🔇":
+      return <VolumeX className={className} size={16} />;
+    case "🎛️":
+      return <Sliders className={className} size={16} />;
+    case "🎧":
+      return <Headphones className={className} size={28} />;
+    case "❄️":
+      return <Wind className={className} size={22} />;
+    case "🔒":
+      return <Lock className={className} size={22} />;
+    case "⚡":
+      return <Zap className={className} size={22} />;
+    case "📦":
+      return <Package className={className} size={22} />;
+    default:
+      return <Sparkles className={className} size={22} />;
+  }
+}
 
 /* ── Scroll-reveal hook ── */
 function useReveal() {
@@ -30,7 +57,7 @@ export default function Facilities({ onBookSession }) {
   const [imageHover, setImageHover] = useState(null);
 
   return (
-    <section id="facilities" className="bg-cream py-16 md:py-24">
+    <section id="facilities" className="bg-cream py-16 md:py-24 overflow-hidden">
       <div className="max-w-6xl mx-auto px-4">
 
         {/* ── Section Header ── */}
@@ -65,22 +92,27 @@ export default function Facilities({ onBookSession }) {
                 <div className="flex flex-wrap gap-2">
                   {recordingBooths.specs.map((spec, i) => (
                     <span key={i} className="inline-flex items-center gap-1.5 border border-warm-gray-light/40 rounded-full px-3 py-1 text-sm text-dark-brown hover:border-accent hover:text-accent transition-colors cursor-default">
-                      <span>{spec.icon}</span>{spec.label}
+                      <FacilityIcon name={spec.icon} />
+                      {spec.label}
                     </span>
                   ))}
                 </div>
               </div>
-              <span className="text-3xl shrink-0 mt-1 hover:scale-125 transition-transform cursor-default">🎧</span>
+              <div className="p-3 bg-accent/10 text-accent rounded-xl shrink-0 mt-1">
+                <FacilityIcon name="🎧" />
+              </div>
             </div>
           </RevealDiv>
 
           <div className="md:col-span-2 flex flex-col gap-6">
             {sideCards.map((card, i) => (
               <RevealDiv key={i} delay={i * 150} className="flex-1">
-                <div className={`rounded-xl p-6 flex-1 flex flex-col justify-center h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-default ${card.variant === "orange" ? "bg-accent text-white hover:shadow-accent/30" : "bg-white border border-gray-200 text-dark-brown hover:shadow-amber-200/50"}`}>
-                  <span className="text-3xl mb-3 block hover:scale-125 transition-transform duration-300">{card.icon}</span>
-                  <h4 className="font-semibold text-lg mb-1">{card.title}</h4>
-                  <p className={`text-sm leading-relaxed ${card.variant === "orange" ? "text-white/80" : "text-warm-gray"}`}>{card.description}</p>
+                <div className={`rounded-2xl p-6 md:p-8 flex-1 flex flex-col justify-center h-full transition-all duration-300 hover:shadow-xl cursor-default relative overflow-hidden ${card.variant === "orange" ? "bg-accent text-white shadow-md hover:shadow-accent/30" : "bg-white border border-gray-200 text-dark-brown hover:shadow-amber-200/50"}`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${card.variant === "orange" ? "bg-white/20 text-white" : "bg-accent/10 text-accent"}`}>
+                    <FacilityIcon name={card.icon} />
+                  </div>
+                  <h4 className="font-bold text-xl mb-2">{card.title}</h4>
+                  <p className={`text-sm leading-relaxed ${card.variant === "orange" ? "text-white/90" : "text-warm-gray"}`}>{card.description}</p>
                 </div>
               </RevealDiv>
             ))}
@@ -133,9 +165,11 @@ export default function Facilities({ onBookSession }) {
                 <div
                   onMouseEnter={() => setHoveredFeature(i)}
                   onMouseLeave={() => setHoveredFeature(null)}
-                  className={`border rounded-xl p-4 text-center bg-white transition-all duration-300 cursor-default ${hoveredFeature === i ? "shadow-lg -translate-y-2 border-accent/30 bg-amber-50/50" : "border-gray-200"}`}
+                  className={`border rounded-xl p-5 text-center bg-white transition-all duration-300 cursor-default flex flex-col items-center justify-center ${hoveredFeature === i ? "shadow-lg -translate-y-1 border-accent/30 bg-amber-50/50" : "border-gray-200"}`}
                 >
-                  <span className={`text-2xl block mb-2 transition-transform duration-300 ${hoveredFeature === i ? "scale-130 animate-bounce" : ""}`}>{card.icon}</span>
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 transition-colors ${hoveredFeature === i ? "bg-accent text-white" : "bg-amber-50 text-accent"}`}>
+                    <FacilityIcon name={card.icon} />
+                  </div>
                   <h4 className="font-semibold text-dark-brown text-sm mb-1">{card.title}</h4>
                   <p className="text-xs text-gray-500 leading-relaxed">{card.description}</p>
                 </div>
