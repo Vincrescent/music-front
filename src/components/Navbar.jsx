@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, History } from 'lucide-react';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
+import CustomerHistoryModal from './booking/CustomerHistoryModal';
 
 const NAV_LINKS = [
   { label: 'Studio', href: '#studios' },
@@ -14,6 +15,7 @@ export default function Navbar({ onBookNow, onLogin }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [activeLink, setActiveLink] = useState('');
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
@@ -144,7 +146,15 @@ export default function Navbar({ onBookNow, onLogin }) {
             <span>{darkMode ? 'Dark' : 'Light'}</span>
           </button>
           {user ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setHistoryOpen(true)}
+                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-accent/10 text-accent hover:bg-accent hover:text-white transition cursor-pointer border border-accent/30"
+                title="Lihat Riwayat Pemesanan Studio Anda"
+              >
+                <History size={14} />
+                Riwayat Booking
+              </button>
               <span className={`text-sm font-medium ${darkMode ? 'text-amber-300' : 'text-brand'}`}>Halo, {user.name || user.username}</span>
               <button
                 onClick={handleLogout}
@@ -279,6 +289,11 @@ export default function Navbar({ onBookNow, onLogin }) {
           setRegisterOpen(false);
           onLogin?.(role, user);
         }}
+      />
+      <CustomerHistoryModal
+        isOpen={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        onNewBooking={onBookNow}
       />
     </header>
   );

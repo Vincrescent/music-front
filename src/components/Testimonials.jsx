@@ -90,7 +90,7 @@ function Stars({ rating }) {
   if (rating === null || rating === undefined) return null;
   return (
     <div className="flex gap-0.5 text-accent text-lg mb-3" aria-label={`${rating} dari 5 bintang`}>
-      {[1,2,3,4,5].map((i) => <span key={i}>{i <= rating ? "★" : "☆"}</span>)}
+      {[1, 2, 3, 4, 5].map((i) => <span key={i}>{i <= rating ? "★" : "☆"}</span>)}
     </div>
   );
 }
@@ -113,17 +113,26 @@ function ExpandableText({ text, maxLen = 120, className = "" }) {
 
 /* ── Default Card ── */
 function DefaultCard({ item }) {
+  const photoUrl = item.image || (item.avatar && item.avatar.startsWith('/storage/') ? item.avatar : null);
+
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-accent/20 cursor-default group">
-      <div>
-        <Stars rating={item.rating} />
-        <ExpandableText text={item.text} className="text-warm-gray" />
-      </div>
-      <div className="flex items-center gap-3 mt-6">
-        <AvatarImage src={item.avatar} name={item.name} className="group-hover:ring-2 group-hover:ring-accent/30 transition" />
+    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-accent/20 cursor-default group">
+      {photoUrl && (
+        <div className="w-full h-44 overflow-hidden bg-gray-100">
+          <img src={getImageUrl(photoUrl)} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        </div>
+      )}
+      <div className="p-6 flex flex-col justify-between flex-1">
         <div>
-          <p className="text-accent font-semibold text-sm">{item.name}</p>
-          <p className="text-gray-500 text-xs uppercase tracking-wide">{item.role}</p>
+          <Stars rating={item.rating} />
+          <ExpandableText text={item.text} className="text-warm-gray" />
+        </div>
+        <div className="flex items-center gap-3 mt-6">
+          <AvatarImage src={item.avatar} name={item.name} className="group-hover:ring-2 group-hover:ring-accent/30 transition" />
+          <div>
+            <p className="text-accent font-semibold text-sm">{item.name}</p>
+            <p className="text-gray-500 text-xs uppercase tracking-wide">{item.role || "Pengunjung Studio"}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -146,7 +155,7 @@ function HighlightCard({ item }) {
         </div>
         <div>
           <p className="font-semibold text-sm">{item.name}</p>
-          <p className="text-white/70 text-xs uppercase tracking-wide">{item.role}</p>
+          <p className="text-white/70 text-xs uppercase tracking-wide">{item.role || "Pengunjung Studio"}</p>
         </div>
       </div>
     </div>
@@ -156,11 +165,13 @@ function HighlightCard({ item }) {
 /* ── Featured Card ── */
 function FeaturedCard({ item }) {
   const [imgHover, setImgHover] = useState(false);
+  const photoUrl = item.image || item.avatar;
+
   return (
     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-default group">
-      <div className="relative aspect-[4/3] overflow-hidden" onMouseEnter={() => setImgHover(true)} onMouseLeave={() => setImgHover(false)}>
-        {item.image ? (
-          <img src={item.image} alt="Sesi studio" className={`w-full h-full object-cover transition-transform duration-500 ${imgHover ? "scale-110" : "scale-100"}`} />
+      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100" onMouseEnter={() => setImgHover(true)} onMouseLeave={() => setImgHover(false)}>
+        {photoUrl ? (
+          <img src={getImageUrl(photoUrl)} alt="Sesi studio" className={`w-full h-full object-cover transition-transform duration-500 ${imgHover ? "scale-110" : "scale-100"}`} />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-amber-100 via-orange-200 to-amber-300 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-amber-500/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
@@ -181,7 +192,7 @@ function FeaturedCard({ item }) {
           <AvatarImage src={item.avatar} name={item.name} className="group-hover:ring-2 group-hover:ring-accent/30 transition" />
           <div>
             <p className="text-accent font-semibold text-sm">{item.name}</p>
-            <p className="text-gray-500 text-xs uppercase tracking-wide">{item.role}</p>
+            <p className="text-gray-500 text-xs uppercase tracking-wide">{item.role || "Pengunjung Studio"}</p>
           </div>
         </div>
       </div>
@@ -220,7 +231,7 @@ function ReviewForm({ onReviewAdded }) {
   const handleSubmit = async (ev) => {
     ev.preventDefault();
     if (!validate()) return;
-    
+
     try {
       const formData = new FormData();
       formData.append('name', form.name);
@@ -236,7 +247,7 @@ function ReviewForm({ onReviewAdded }) {
           'Content-Type': 'multipart/form-data'
         }
       });
-      
+
       if (res.data.success) {
         setToast(true);
         setForm({ name: "", band: "", text: "" });
@@ -245,7 +256,7 @@ function ReviewForm({ onReviewAdded }) {
         setPreview(null);
         setErrors({});
         setTimeout(() => setToast(false), 3000);
-        
+
         if (onReviewAdded) {
           onReviewAdded(res.data.data);
         }
@@ -280,13 +291,13 @@ function ReviewForm({ onReviewAdded }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-dark-brown mb-1.5">Nama Anda</label>
-            <input type="text" placeholder="Masukkan nama lengkap Anda" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})}
+            <input type="text" placeholder="Masukkan nama lengkap Anda" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
               className={`w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition ${errors.name ? "border-red-400" : "border-gray-300"}`} />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-dark-brown mb-1.5">Nama Band atau Proyek</label>
-            <input type="text" placeholder="Masukkan nama band / proyek" value={form.band} onChange={(e) => setForm({...form, band: e.target.value})}
+            <input type="text" placeholder="Masukkan nama band / proyek" value={form.band} onChange={(e) => setForm({ ...form, band: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition" />
           </div>
         </div>
@@ -294,7 +305,7 @@ function ReviewForm({ onReviewAdded }) {
         <div>
           <label className="block text-sm font-medium text-dark-brown mb-1.5">Penilaian</label>
           <div className="flex gap-1 text-2xl cursor-pointer">
-            {[1,2,3,4,5].map((i) => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <span key={i}
                 onMouseEnter={() => setHoverRating(i)}
                 onMouseLeave={() => setHoverRating(0)}
@@ -308,7 +319,7 @@ function ReviewForm({ onReviewAdded }) {
 
         <div>
           <label className="block text-sm font-medium text-dark-brown mb-1.5">Testimoni Anda</label>
-          <textarea rows={4} placeholder="Ceritakan pengalaman Anda di studio..." value={form.text} onChange={(e) => setForm({...form, text: e.target.value})}
+          <textarea rows={4} placeholder="Ceritakan pengalaman Anda di studio..." value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })}
             className={`w-full h-32 border rounded-xl p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition ${errors.text ? "border-red-400" : "border-gray-300"}`} />
           {errors.text && <p className="text-red-500 text-xs mt-1">{errors.text}</p>}
         </div>
@@ -317,7 +328,7 @@ function ReviewForm({ onReviewAdded }) {
           <label className="block text-sm font-medium text-dark-brown mb-1.5">Unggah Foto (Opsional)</label>
           <label className="block border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-accent/50 hover:bg-amber-50/30 transition-all group relative overflow-hidden">
             <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-            
+
             {preview ? (
               <div className="absolute inset-0 w-full h-full p-2">
                 <img src={preview} alt="Preview" className="w-full h-full object-cover rounded-lg shadow-sm" />
@@ -347,7 +358,7 @@ function ReviewForm({ onReviewAdded }) {
 /* ── Main Section ── */
 export default function Testimonials() {
   const [reviews, setReviews] = useState([]);
-  
+
   useEffect(() => {
     api.get('/reviews')
       .then(res => {
@@ -389,7 +400,7 @@ export default function Testimonials() {
             if (idx === 2) return <div key={item.id} className="md:col-start-2 md:row-start-1 md:row-span-2"><TestimonialCard item={item} /></div>;
             if (idx === 3) return <div key={item.id} className="md:col-start-3 md:row-start-1"><TestimonialCard item={item} /></div>;
             if (idx === 4) return <div key={item.id} className="md:col-start-3 md:row-start-2"><TestimonialCard item={item} /></div>;
-            
+
             return <div key={item.id} className="md:col-span-1"><TestimonialCard item={item} /></div>;
           })}
         </div>

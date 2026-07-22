@@ -60,58 +60,73 @@ function StudioCard({ studio, isSelected, onSelect }) {
       disabled={!isAvailable}
       onClick={() => isAvailable && onSelect(studio)}
       className={`
-        text-left w-full border rounded-xl overflow-hidden bg-white shadow-sm
-        transition-all duration-200
-        ${isAvailable ? "hover:shadow-md cursor-pointer" : "opacity-50 cursor-not-allowed"}
-        ${isSelected ? "ring-2 ring-accent border-accent" : "border-gray-200"}
+        text-left w-full border rounded-2xl overflow-hidden bg-white shadow-sm
+        transition-all duration-300 hover:-translate-y-1 group flex flex-col justify-between h-full
+        ${isAvailable ? "hover:shadow-xl cursor-pointer" : "opacity-50 cursor-not-allowed"}
+        ${isSelected ? "ring-2 ring-accent border-accent shadow-lg" : "border-gray-200 hover:border-accent/40"}
       `}
     >
-      {/* Image */}
-      <div className="aspect-[4/3] overflow-hidden">
-        <img
-          src={studio.image}
-          alt={studio.name}
-          className="w-full h-full object-cover rounded-t-xl"
-        />
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        {/* Name + Badge */}
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-bold text-lg text-dark-brown">{studio.name}</h3>
+      <div>
+        {/* Image */}
+        <div className="aspect-[16/10] overflow-hidden relative bg-gray-100">
+          <img
+            src={studio.image}
+            alt={studio.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
           <span
-            className={`text-xs uppercase font-semibold px-2.5 py-0.5 rounded-full ${
+            className={`absolute top-3 right-3 text-xs uppercase font-bold px-3 py-1 rounded-full shadow-sm ${
               isAvailable
-                ? "bg-peach text-brand"
-                : "bg-gray-200 text-gray-500"
+                ? "bg-emerald-500 text-white"
+                : "bg-gray-800 text-white"
             }`}
           >
             {studio.status}
           </span>
         </div>
 
-        {/* Features line */}
-        <div className="flex items-center gap-3 text-sm text-warm-gray mb-1">
-          <span className="flex items-center gap-1">
-            <PersonIcon />
-            {studio.capacity} Pax
-          </span>
-          <span className="flex items-center gap-1">
-            <AudioIcon />
-            {studio.features[0]}
-          </span>
+        {/* Content */}
+        <div className="p-6 md:p-7 space-y-3">
+          {/* Name */}
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-xl text-dark-brown group-hover:text-accent transition-colors">{studio.name}</h3>
+          </div>
+
+          {/* Features line */}
+          <div className="flex items-center gap-4 text-sm text-warm-gray flex-wrap pt-1">
+            <span className="flex items-center gap-1.5 font-medium bg-cream px-2.5 py-1 rounded-lg">
+              <PersonIcon />
+              {studio.capacity} Pax
+            </span>
+            <span className="flex items-center gap-1.5 font-medium bg-cream px-2.5 py-1 rounded-lg">
+              <AudioIcon />
+              {studio.features[0]}
+            </span>
+          </div>
+
+          {studio.facilities && (
+            <p className="text-xs text-warm-gray-light leading-relaxed pt-1">
+              {studio.facilities}
+            </p>
+          )}
         </div>
+      </div>
 
-        {/* Divider */}
-        <div className="border-t border-gray-100 my-3" />
-
-        {/* Price + Arrow */}
-        <div className="flex items-center justify-between">
-          <span className="text-accent font-semibold text-sm">
-            {studio.priceRange}/Sesi
-          </span>
-          <span className={isAvailable ? "text-accent" : "text-gray-300"}>
+      {/* Bottom Footer */}
+      <div className="px-6 pb-6 md:px-7 md:pb-7">
+        <div className="border-t border-gray-100 pt-4 flex items-center justify-between">
+          <div>
+            <span className="text-xs text-warm-gray block">Tarif Sewa</span>
+            <span className="text-accent font-bold text-base md:text-lg">
+              {studio.priceRange}
+            </span>
+          </div>
+          <span className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
+            isAvailable 
+              ? (isSelected ? "bg-accent text-white" : "bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white") 
+              : "bg-gray-100 text-gray-400"
+          }`}>
+            Pilih Studio
             <ArrowRightIcon />
           </span>
         </div>
@@ -143,29 +158,29 @@ export default function StepStudio({ studios = [], selectedStudio, onSelect }) {
   }, [studios, capacityFilter, featureFilter]);
 
   return (
-    <section className="w-full">
+    <section className="w-full max-w-6xl mx-auto px-2 py-4">
       {/* Header row */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
         {/* Title */}
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-dark-brown">
-            Pilih Studio
+            Pilih Studio Latihan
           </h2>
-          <p className="text-warm-gray mt-1">
-            Temukan ruang yang sesuai dengan kebutuhan produksi Anda.
+          <p className="text-warm-gray mt-1.5 text-sm md:text-base">
+            Temukan ruang yang sesuai dengan kebutuhan produksi dan jumlah personil Anda.
           </p>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {/* Capacity dropdown */}
           <div className="relative">
             <select
               value={capacityFilter}
               onChange={(e) => setCapacityFilter(e.target.value)}
-              className="appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-9
+              className="appearance-none border border-gray-300 rounded-xl px-4 py-2.5 pr-9
                          text-sm bg-white text-dark-brown focus:outline-none focus:ring-2
-                         focus:ring-accent/30 focus:border-accent cursor-pointer"
+                         focus:ring-accent/30 focus:border-accent cursor-pointer shadow-sm"
             >
               {capacityOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -173,7 +188,7 @@ export default function StepStudio({ studios = [], selectedStudio, onSelect }) {
                 </option>
               ))}
             </select>
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
               <ChevronDownIcon />
             </span>
           </div>
@@ -183,9 +198,9 @@ export default function StepStudio({ studios = [], selectedStudio, onSelect }) {
             <select
               value={featureFilter}
               onChange={(e) => setFeatureFilter(e.target.value)}
-              className="appearance-none border border-gray-300 rounded-lg px-4 py-2 pr-9
+              className="appearance-none border border-gray-300 rounded-xl px-4 py-2.5 pr-9
                          text-sm bg-white text-dark-brown focus:outline-none focus:ring-2
-                         focus:ring-accent/30 focus:border-accent cursor-pointer"
+                         focus:ring-accent/30 focus:border-accent cursor-pointer shadow-sm"
             >
               {featureOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -193,7 +208,7 @@ export default function StepStudio({ studios = [], selectedStudio, onSelect }) {
                 </option>
               ))}
             </select>
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
               <ChevronDownIcon />
             </span>
           </div>
@@ -202,7 +217,7 @@ export default function StepStudio({ studios = [], selectedStudio, onSelect }) {
 
       {/* Studio grid */}
       {filteredStudios.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
           {filteredStudios.map((studio) => (
             <StudioCard
               key={studio.id}
@@ -213,8 +228,8 @@ export default function StepStudio({ studios = [], selectedStudio, onSelect }) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 text-warm-gray">
-          <p className="text-lg font-medium mb-1">Tidak ada studio yang cocok</p>
+        <div className="text-center py-20 text-warm-gray bg-white rounded-2xl border border-dashed border-gray-200">
+          <p className="text-lg font-medium mb-1 text-dark-brown">Tidak ada studio yang cocok</p>
           <p className="text-sm">Coba ubah filter untuk melihat studio lainnya.</p>
         </div>
       )}

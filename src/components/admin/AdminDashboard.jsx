@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import axios from "axios";
+import api from "../../utils/axiosConfig";
 import { useToast, Modal, ConfirmDialog, exportToCSV } from "../shared/UIHelpers";
 import DashboardLayout from "../dashboard/DashboardLayout";
 import {
@@ -133,7 +133,7 @@ function DashboardPage() {
   const [reportPeriod, setReportPeriod] = useState(reportGenerator.periods[0]);
   const [reportChecks, setReportChecks] = useState({ "Pendapatan & Penjualan": true, "Status Peralatan": true, "Catatan Pelanggan": false });
   const [selectedBooking, setSelectedBooking] = useState(null);
-  
+
   const [stats, setStats] = useState({
     totalBookingToday: 0,
     dailyRevenue: "Rp 0",
@@ -144,17 +144,12 @@ function DashboardPage() {
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
-      if (!token) return;
-
-      const headers = { Authorization: `Bearer ${token}` };
-
-      const statsRes = await axios.get("http://localhost:8000/api/admin/stats", { headers });
+      const statsRes = await api.get("/admin/stats");
       if (statsRes.data.success) {
         setStats(statsRes.data.data);
       }
 
-      const bookingsRes = await axios.get("http://localhost:8000/api/bookings", { headers });
+      const bookingsRes = await api.get("/bookings");
       if (bookingsRes.data.success) {
         setRecentBookings(bookingsRes.data.data.slice(0, 5));
       }
@@ -169,9 +164,9 @@ function DashboardPage() {
 
   const toggleCheck = (key) => setReportChecks((p) => ({ ...p, [key]: !p[key] }));
   const handleSendReport = () => {
-    const selected = Object.entries(reportChecks).filter(([,v]) => v).map(([k]) => k);
+    const selected = Object.entries(reportChecks).filter(([, v]) => v).map(([k]) => k);
     if (selected.length === 0) { toast("Pilih minimal satu konten laporan", "error"); return; }
-    
+
     const existingReports = JSON.parse(localStorage.getItem("generated_reports") || "[]");
     const newReport = {
       id: Date.now(),
@@ -188,10 +183,7 @@ function DashboardPage() {
   };
   const handleValidateBooking = async (id) => {
     try {
-      const token = localStorage.getItem("auth_token");
-      await axios.post(`http://localhost:8000/api/bookings/${id}/validate`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post(`/bookings/${id}/validate`);
       toast("Booking berhasil divalidasi ✓");
       fetchData();
     } catch (error) {
@@ -251,7 +243,7 @@ function DashboardPage() {
                     </td>
                     <td className="px-5 py-3 text-warm-gray">{b.studio ? b.studio.name : "Studio"}</td>
                     <td className="px-5 py-3 text-warm-gray">
-                      {b.booking_date} · {b.start_time.substring(0,5)} - {b.end_time.substring(0,5)}
+                      {b.booking_date} · {b.start_time.substring(0, 5)} - {b.end_time.substring(0, 5)}
                     </td>
                     <td className="px-5 py-3">
                       <StatusBadge status={b.status} />
@@ -351,7 +343,7 @@ function DashboardPage() {
             <div className="flex items-center gap-3 mb-4"><Avatar name={selectedBooking.user?.name || "Unknown"} /><div><p className="font-semibold text-brand">{selectedBooking.user?.name || "Unknown"}</p><p className="text-xs text-warm-gray">{selectedBooking.studio?.name || "Unknown"}</p></div></div>
             <div className="bg-cream rounded-lg p-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-warm-gray">Tanggal</span><span className="font-medium text-brand">{selectedBooking.booking_date}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-warm-gray">Waktu</span><span className="font-medium text-brand">{selectedBooking.start_time?.substring(0,5)} - {selectedBooking.end_time?.substring(0,5)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-warm-gray">Waktu</span><span className="font-medium text-brand">{selectedBooking.start_time?.substring(0, 5)} - {selectedBooking.end_time?.substring(0, 5)}</span></div>
               <div className="flex justify-between text-sm"><span className="text-warm-gray">Status</span><StatusBadge status={selectedBooking.status} /></div>
             </div>
             {selectedBooking.status === "Pending" && (
@@ -382,11 +374,7 @@ function BookingPage() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const token = localStorage.getItem("auth_token");
-        if (!token) return;
-        const res = await axios.get("http://localhost:8000/api/bookings", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get("/bookings");
         if (res.data.success) {
           setBookings(res.data.data);
         }
@@ -411,11 +399,7 @@ function BookingPage() {
 
   const handleCancel = async (id) => {
     try {
-      const token = localStorage.getItem("auth_token");
-      await axios.put(`http://localhost:8000/api/bookings/${id}/status`,
-        { status: 'Cancelled' },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.put(`/bookings/${id}/status`, { status: 'Cancelled' });
       setBookingStates(prev => ({ ...prev, [id]: "Cancelled" }));
       toast("Booking berhasil dibatalkan", "error");
     } catch (err) {
@@ -501,29 +485,29 @@ function BookingPage() {
               {filtered.map((b) => {
                 const status = bookingStates[b.id] || b.status;
                 return (
-                <tr key={b.id} className="border-b border-gray-50 last:border-0 hover:bg-cream/30 transition">
-                  <td className="px-5 py-4"><div className="flex items-center gap-3"><Avatar name={b.user?.name || "Unknown"} /><div><p className="font-medium text-brand">{b.user?.name || "Unknown"}</p><p className="text-xs text-warm-gray-light">{b.user?.email || "Tidak ada email"}</p></div></div></td>
-                  <td className="px-5 py-4"><p className="font-medium text-brand">{b.studio?.name || "Unknown"}</p><p className="text-xs text-warm-gray-light">{b.studio?.type || "Standard"}</p></td>
-                  <td className="px-5 py-4"><p className="text-brand">{b.booking_date}</p><p className="text-xs text-warm-gray-light">{b.start_time?.substring(0,5)} - {b.end_time?.substring(0,5)}</p></td>
-                  <td className="px-5 py-4"><StatusBadge status={status} /></td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => setSelectedBooking(b)} className="p-1.5 rounded-lg hover:bg-accent/10 text-accent transition cursor-pointer" title="Lihat"><Eye size={15} /></button>
-                      {status !== "Cancelled" && status !== "CANCELLED" && <button onClick={() => setConfirmCancel(b.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition cursor-pointer" title="Batalkan"><XIcon size={15} /></button>}
-                      {status !== "Completed" && status !== "COMPLETED" && status !== "Cancelled" && status !== "CANCELLED" && (
-                        <button onClick={async () => {
-                          try {
-                            const token = localStorage.getItem("auth_token");
-                            await axios.put(`http://localhost:8000/api/bookings/${b.id}/status`, { status: 'Completed' }, { headers: { Authorization: `Bearer ${token}` } });
-                            setBookingStates(prev => ({ ...prev, [b.id]: "Completed" }));
-                            toast("Booking diselesaikan! 🎉", "success");
-                          } catch (err) { toast("Gagal menyelesaikan booking", "error"); }
-                        }} className="p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-500 transition cursor-pointer" title="Selesaikan"><CheckCircle size={15} /></button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              )})}
+                  <tr key={b.id} className="border-b border-gray-50 last:border-0 hover:bg-cream/30 transition">
+                    <td className="px-5 py-4"><div className="flex items-center gap-3"><Avatar name={b.user?.name || "Unknown"} /><div><p className="font-medium text-brand">{b.user?.name || "Unknown"}</p><p className="text-xs text-warm-gray-light">{b.user?.email || "Tidak ada email"}</p></div></div></td>
+                    <td className="px-5 py-4"><p className="font-medium text-brand">{b.studio?.name || "Unknown"}</p><p className="text-xs text-warm-gray-light">{b.studio?.type || "Standard"}</p></td>
+                    <td className="px-5 py-4"><p className="text-brand">{b.booking_date}</p><p className="text-xs text-warm-gray-light">{b.start_time?.substring(0, 5)} - {b.end_time?.substring(0, 5)}</p></td>
+                    <td className="px-5 py-4"><StatusBadge status={status} /></td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => setSelectedBooking(b)} className="p-1.5 rounded-lg hover:bg-accent/10 text-accent transition cursor-pointer" title="Lihat"><Eye size={15} /></button>
+                        {status !== "Cancelled" && status !== "CANCELLED" && <button onClick={() => setConfirmCancel(b.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 transition cursor-pointer" title="Batalkan"><XIcon size={15} /></button>}
+                        {status !== "Completed" && status !== "COMPLETED" && status !== "Cancelled" && status !== "CANCELLED" && (
+                          <button onClick={async () => {
+                            try {
+                              await api.put(`/bookings/${b.id}/status`, { status: 'Completed' });
+                              setBookingStates(prev => ({ ...prev, [b.id]: "Completed" }));
+                              toast("Booking diselesaikan! 🎉", "success");
+                            } catch (err) { toast("Gagal menyelesaikan booking", "error"); }
+                          }} className="p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-500 transition cursor-pointer" title="Selesaikan"><CheckCircle size={15} /></button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -557,7 +541,7 @@ function BookingPage() {
             <div className="bg-cream rounded-lg p-4 space-y-2">
               <div className="flex justify-between text-sm"><span className="text-warm-gray">Studio</span><span className="font-medium">{selectedBooking.studio?.name || "Unknown"}</span></div>
               <div className="flex justify-between text-sm"><span className="text-warm-gray">Tanggal</span><span className="font-medium">{selectedBooking.booking_date}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-warm-gray">Waktu</span><span className="font-medium">{selectedBooking.start_time?.substring(0,5)} - {selectedBooking.end_time?.substring(0,5)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-warm-gray">Waktu</span><span className="font-medium">{selectedBooking.start_time?.substring(0, 5)} - {selectedBooking.end_time?.substring(0, 5)}</span></div>
               <div className="flex justify-between text-sm"><span className="text-warm-gray">Status</span><StatusBadge status={bookingStates[selectedBooking.id] || selectedBooking.status} /></div>
             </div>
           </div>
@@ -579,11 +563,7 @@ function ValidasiPage() {
 
   const fetchBookings = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
-      if (!token) return;
-      const res = await axios.get("http://localhost:8000/api/bookings", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get("/bookings");
       if (res.data.success) {
         setBookings(res.data.data);
       }
@@ -598,10 +578,7 @@ function ValidasiPage() {
 
   const handleValidate = async (id, name) => {
     try {
-      const token = localStorage.getItem("auth_token");
-      await axios.post(`http://localhost:8000/api/bookings/${id}/validate`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post(`/bookings/${id}/validate`);
       toast(`Pembayaran ${name} berhasil divalidasi ✓`);
       fetchBookings();
     } catch (error) {
@@ -642,32 +619,33 @@ function ValidasiPage() {
           const name = p.user ? p.user.name : "Unknown";
           const studio = p.studio ? p.studio.name : "Studio";
           return (
-          <div key={p.id} className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col md:flex-row md:items-center gap-5 hover:shadow-md transition">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
-              <Avatar name={name} size="w-12 h-12" bg="bg-accent/15 text-accent" />
-              <div className="min-w-0">
-                <p className="font-semibold text-brand truncate">{name}</p>
-                <p className="text-xs text-warm-gray-light mt-0.5">Booking ID: #{p.id}</p>
-                <div className="flex items-center gap-3 mt-1 text-xs text-warm-gray"><span>{studio}</span><span className="w-1 h-1 rounded-full bg-warm-gray-light" /><span>{p.start_time.substring(0,5)} - {p.end_time.substring(0,5)}</span></div>
+            <div key={p.id} className="bg-white rounded-xl border border-gray-100 p-5 flex flex-col md:flex-row md:items-center gap-5 hover:shadow-md transition">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                <Avatar name={name} size="w-12 h-12" bg="bg-accent/15 text-accent" />
+                <div className="min-w-0">
+                  <p className="font-semibold text-brand truncate">{name}</p>
+                  <p className="text-xs text-warm-gray-light mt-0.5">Booking ID: #{p.id}</p>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-warm-gray"><span>{studio}</span><span className="w-1 h-1 rounded-full bg-warm-gray-light" /><span>{p.start_time.substring(0, 5)} - {p.end_time.substring(0, 5)}</span></div>
+                </div>
+              </div>
+              <div className="text-right md:text-center shrink-0">
+                <p className="text-xs text-warm-gray uppercase tracking-wide">Total</p>
+                <p className="text-xl font-bold text-amber mt-0.5">Rp {(p.total_price || 0).toLocaleString("id-ID")}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button onClick={() => setReceiptModal(p)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-warm-gray hover:bg-cream transition cursor-pointer flex items-center gap-1.5 active:scale-95">
+                  <Eye size={14} /> Lihat Bukti
+                </button>
+                <button onClick={() => setConfirmReject(p)} className="px-3 py-2 border border-red-200 rounded-lg text-sm text-red-500 hover:bg-red-50 transition cursor-pointer active:scale-95">
+                  Tolak
+                </button>
+                <button onClick={() => handleValidate(p.id, name)} className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-semibold hover:bg-emerald-600 transition cursor-pointer flex items-center gap-1.5 active:scale-95">
+                  <CheckCircle size={14} /> Validasi
+                </button>
               </div>
             </div>
-            <div className="text-right md:text-center shrink-0">
-              <p className="text-xs text-warm-gray uppercase tracking-wide">Total</p>
-              <p className="text-xl font-bold text-amber mt-0.5">Rp {(p.total_price || 0).toLocaleString("id-ID")}</p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button onClick={() => setReceiptModal(p)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-warm-gray hover:bg-cream transition cursor-pointer flex items-center gap-1.5 active:scale-95">
-                <Eye size={14} /> Lihat Bukti
-              </button>
-              <button onClick={() => setConfirmReject(p)} className="px-3 py-2 border border-red-200 rounded-lg text-sm text-red-500 hover:bg-red-50 transition cursor-pointer active:scale-95">
-                Tolak
-              </button>
-              <button onClick={() => handleValidate(p.id, name)} className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-semibold hover:bg-emerald-600 transition cursor-pointer flex items-center gap-1.5 active:scale-95">
-                <CheckCircle size={14} /> Validasi
-              </button>
-            </div>
-          </div>
-        )})}
+          )
+        })}
       </div>
 
       {processed.length > 0 && (
@@ -677,17 +655,18 @@ function ValidasiPage() {
             const name = p.user ? p.user.name : "Unknown";
             const studio = p.studio ? p.studio.name : "Studio";
             return (
-            <div key={p.id} className="bg-gray-50 rounded-xl border border-gray-100 p-4 flex items-center gap-4 opacity-60">
-              <Avatar name={name} size="w-10 h-10" />
-              <div className="flex-1"><p className="font-medium text-brand text-sm">{name}</p><p className="text-xs text-warm-gray">{studio}</p></div>
-              <StatusBadge status={p.status} />
-              <p className="font-bold text-brand text-sm">Rp {(p.total_price || 0).toLocaleString("id-ID")}</p>
-            </div>
-          )})}
+              <div key={p.id} className="bg-gray-50 rounded-xl border border-gray-100 p-4 flex items-center gap-4 opacity-60">
+                <Avatar name={name} size="w-10 h-10" />
+                <div className="flex-1"><p className="font-medium text-brand text-sm">{name}</p><p className="text-xs text-warm-gray">{studio}</p></div>
+                <StatusBadge status={p.status} />
+                <p className="font-bold text-brand text-sm">Rp {(p.total_price || 0).toLocaleString("id-ID")}</p>
+              </div>
+            )
+          })}
         </div>
       )}
 
-      <ConfirmDialog open={!!confirmReject} onClose={() => setConfirmReject(null)} onConfirm={() => { if(confirmReject) { handleReject(confirmReject.id, confirmReject.user ? confirmReject.user.name : ""); setConfirmReject(null); } }} title="Tolak Pembayaran?" message={`Apakah Anda yakin ingin menolak pembayaran dari ${confirmReject?.user ? confirmReject.user.name : "Unknown"}?`} confirmText="Ya, Tolak" variant="red" />
+      <ConfirmDialog open={!!confirmReject} onClose={() => setConfirmReject(null)} onConfirm={() => { if (confirmReject) { handleReject(confirmReject.id, confirmReject.user ? confirmReject.user.name : ""); setConfirmReject(null); } }} title="Tolak Pembayaran?" message={`Apakah Anda yakin ingin menolak pembayaran dari ${confirmReject?.user ? confirmReject.user.name : "Unknown"}?`} confirmText="Ya, Tolak" variant="red" />
 
       <Modal open={!!receiptModal} onClose={() => setReceiptModal(null)} title="Bukti Pembayaran">
         {receiptModal && (
@@ -696,7 +675,7 @@ function ValidasiPage() {
               <div className="flex justify-between text-sm"><span className="text-warm-gray">Nama</span><span className="font-medium text-brand">{receiptModal.user ? receiptModal.user.name : "Unknown"}</span></div>
               <div className="flex justify-between text-sm"><span className="text-warm-gray">Booking ID</span><span className="font-medium text-brand">#{receiptModal.id}</span></div>
               <div className="flex justify-between text-sm"><span className="text-warm-gray">Studio</span><span className="font-medium text-brand">{receiptModal.studio ? receiptModal.studio.name : "Studio"}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-warm-gray">Durasi</span><span className="font-medium text-brand">{receiptModal.start_time.substring(0,5)} - {receiptModal.end_time.substring(0,5)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-warm-gray">Durasi</span><span className="font-medium text-brand">{receiptModal.start_time.substring(0, 5)} - {receiptModal.end_time.substring(0, 5)}</span></div>
               <div className="flex justify-between text-sm border-t pt-2"><span className="text-warm-gray font-semibold">Total</span><span className="font-bold text-accent text-lg">Rp {(receiptModal.total_price || 0).toLocaleString("id-ID")}</span></div>
             </div>
             <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center"><p className="text-warm-gray text-sm">📄 Bukti transfer akan ditampilkan di sini</p></div>
@@ -723,10 +702,7 @@ function DataStudioPage() {
 
   const fetchStudios = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
-      const res = await axios.get("http://localhost:8000/api/studios", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get("/studios");
       if (res.data.success) {
         setStudios(res.data.data);
       }
@@ -741,10 +717,7 @@ function DataStudioPage() {
 
   const handleAdd = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
-      await axios.post("http://localhost:8000/api/studios", newStudio, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post("/studios", newStudio);
       toast("Studio berhasil ditambahkan!", "success");
       setShowAdd(false);
       setNewStudio({ name: "", type: "Standard", price_per_hour: 85000, status: "Available", description: "" });
@@ -755,7 +728,7 @@ function DataStudioPage() {
   };
 
   const handleDelete = async (id) => {
-    if(!window.confirm("Hapus studio ini?")) return;
+    if (!window.confirm("Hapus studio ini?")) return;
     try {
       const token = localStorage.getItem("auth_token");
       await axios.delete(`http://localhost:8000/api/studios/${id}`, {
@@ -790,21 +763,21 @@ function DataStudioPage() {
 
       <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Tambah Studio">
         <div className="space-y-4">
-          <div><label className="block text-sm font-medium text-brand mb-1">Nama Studio</label><input type="text" value={newStudio.name} onChange={e => setNewStudio({...newStudio, name: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" placeholder="Contoh: Studio D" /></div>
+          <div><label className="block text-sm font-medium text-brand mb-1">Nama Studio</label><input type="text" value={newStudio.name} onChange={e => setNewStudio({ ...newStudio, name: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" placeholder="Contoh: Studio D" /></div>
           <div><label className="block text-sm font-medium text-brand mb-1">Tipe</label>
-            <select value={newStudio.type} onChange={e => setNewStudio({...newStudio, type: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+            <select value={newStudio.type} onChange={e => setNewStudio({ ...newStudio, type: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
               <option value="Premium">Premium</option>
               <option value="Standard">Standard</option>
             </select>
           </div>
-          <div><label className="block text-sm font-medium text-brand mb-1">Harga per Jam</label><input type="number" value={newStudio.price_per_hour} onChange={e => setNewStudio({...newStudio, price_per_hour: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" /></div>
+          <div><label className="block text-sm font-medium text-brand mb-1">Harga per Jam</label><input type="number" value={newStudio.price_per_hour} onChange={e => setNewStudio({ ...newStudio, price_per_hour: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" /></div>
           <div><label className="block text-sm font-medium text-brand mb-1">Status</label>
-            <select value={newStudio.status} onChange={e => setNewStudio({...newStudio, status: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+            <select value={newStudio.status} onChange={e => setNewStudio({ ...newStudio, status: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
               <option value="Available">Available</option>
               <option value="Maintenance">Maintenance</option>
             </select>
           </div>
-          <div><label className="block text-sm font-medium text-brand mb-1">Deskripsi</label><textarea value={newStudio.description} onChange={e => setNewStudio({...newStudio, description: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" placeholder="Opsional..."></textarea></div>
+          <div><label className="block text-sm font-medium text-brand mb-1">Deskripsi</label><textarea value={newStudio.description} onChange={e => setNewStudio({ ...newStudio, description: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" placeholder="Opsional..."></textarea></div>
           <button onClick={handleAdd} className="w-full py-2.5 bg-accent text-white rounded-lg text-sm font-semibold hover:bg-accent-dark transition cursor-pointer">Simpan</button>
         </div>
       </Modal>
@@ -830,10 +803,10 @@ function DataStudioPage() {
               </div>
               <div className="flex gap-2">
                 <button className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-warm-gray hover:bg-cream transition cursor-pointer flex items-center justify-center gap-1.5 flex-1">
-                   <Edit size={14} /> Edit
+                  <Edit size={14} /> Edit
                 </button>
                 <button onClick={() => handleDelete(studio.id)} className="px-4 py-2 bg-red-50 text-red-500 rounded-lg text-sm font-semibold hover:bg-red-100 transition cursor-pointer flex items-center justify-center gap-1.5">
-                   <XIcon size={14} />
+                  <XIcon size={14} />
                 </button>
               </div>
             </div>
@@ -845,33 +818,33 @@ function DataStudioPage() {
       <div className="bg-gradient-to-br from-accent to-accent-dark rounded-xl p-6 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex gap-8">
           <div>
-             <p className="text-xs uppercase tracking-wide opacity-80">Total Studio</p>
+            <p className="text-xs uppercase tracking-wide opacity-80">Total Studio</p>
             <p className="text-3xl font-bold mt-1">{studios.length}</p>
           </div>
           <div>
-             <p className="text-xs uppercase tracking-wide opacity-80">Rata-rata Tarif</p>
+            <p className="text-xs uppercase tracking-wide opacity-80">Rata-rata Tarif</p>
             <p className="text-3xl font-bold mt-1">Rp {studios.length > 0 ? (studios.reduce((acc, s) => acc + parseInt(s.price_per_hour), 0) / studios.length).toLocaleString('id-ID') : 0}</p>
           </div>
         </div>
         <div className="text-right md:text-left">
-           <p className="text-sm italic opacity-80">"Setiap suara bercerita. Jadikan setiap sesi berarti."</p>
+          <p className="text-sm italic opacity-80">"Setiap suara bercerita. Jadikan setiap sesi berarti."</p>
         </div>
       </div>
 
       {/* Recent Rate Adjustments */}
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
-           <h2 className="text-sm font-semibold text-brand">Penyesuaian Tarif Terbaru</h2>
+          <h2 className="text-sm font-semibold text-brand">Penyesuaian Tarif Terbaru</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-warm-gray-light uppercase tracking-wide border-b border-gray-100 bg-cream/50">
-                 <th className="px-5 py-3">Ruangan</th>
-                 <th className="px-5 py-3">Tarif Lama</th>
-                 <th className="px-5 py-3">Tarif Baru</th>
-                 <th className="px-5 py-3">Tanggal</th>
-                 <th className="px-5 py-3">Oleh</th>
+                <th className="px-5 py-3">Ruangan</th>
+                <th className="px-5 py-3">Tarif Lama</th>
+                <th className="px-5 py-3">Tarif Baru</th>
+                <th className="px-5 py-3">Tanggal</th>
+                <th className="px-5 py-3">Oleh</th>
               </tr>
             </thead>
             <tbody>
@@ -962,7 +935,7 @@ function PeralatanPage() {
   };
 
   const handleDelete = async (id) => {
-    if(!window.confirm("Hapus peralatan ini?")) return;
+    if (!window.confirm("Hapus peralatan ini?")) return;
     try {
       const token = localStorage.getItem("token") || localStorage.getItem("auth_token");
       await axios.delete(`http://localhost:8000/api/equipment/${id}`, {
@@ -1012,7 +985,7 @@ function PeralatanPage() {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray-light" />
             <input
               type="text"
-               placeholder="Cari peralatan..."
+              placeholder="Cari peralatan..."
               className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-accent/30 w-48"
             />
           </div>
@@ -1026,11 +999,11 @@ function PeralatanPage() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-brand mb-1">Nama Peralatan</label>
-            <input type="text" value={newEq.name} onChange={e => setNewEq({...newEq, name: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" placeholder="Contoh: Fender Stratocaster" />
+            <input type="text" value={newEq.name} onChange={e => setNewEq({ ...newEq, name: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" placeholder="Contoh: Fender Stratocaster" />
           </div>
           <div>
             <label className="block text-sm font-medium text-brand mb-1">Studio</label>
-            <select value={newEq.studio_id} onChange={e => setNewEq({...newEq, studio_id: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+            <select value={newEq.studio_id} onChange={e => setNewEq({ ...newEq, studio_id: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
               <option value="1">Studio A</option>
               <option value="2">Studio B</option>
               <option value="3">Studio C</option>
@@ -1038,7 +1011,7 @@ function PeralatanPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-brand mb-1">Kondisi</label>
-            <select value={newEq.status} onChange={e => setNewEq({...newEq, status: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+            <select value={newEq.status} onChange={e => setNewEq({ ...newEq, status: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
               <option value="Good">Good</option>
               <option value="Service">Service</option>
               <option value="Broken">Broken</option>
@@ -1046,7 +1019,7 @@ function PeralatanPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-brand mb-1">Catatan</label>
-            <textarea value={newEq.notes} onChange={e => setNewEq({...newEq, notes: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" placeholder="Opsional..."></textarea>
+            <textarea value={newEq.notes} onChange={e => setNewEq({ ...newEq, notes: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" placeholder="Opsional..."></textarea>
           </div>
           <button onClick={handleAdd} className="w-full py-2.5 bg-accent text-white rounded-lg text-sm font-semibold hover:bg-accent-dark transition cursor-pointer">Simpan</button>
         </div>
@@ -1056,7 +1029,7 @@ function PeralatanPage() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-brand mb-1">Pilih Teknisi</label>
-            <select value={assignForm.technician_id} onChange={e => setAssignForm({...assignForm, technician_id: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
+            <select value={assignForm.technician_id} onChange={e => setAssignForm({ ...assignForm, technician_id: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
               {(technicians.length > 0 ? technicians : defaultTechnicians).map(t => (
                 <option key={t.id} value={t.id}>{t.name} ({t.specialization || "Spesialis Audio/Instrumen"})</option>
               ))}
@@ -1064,11 +1037,11 @@ function PeralatanPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-brand mb-1">Tanggal & Waktu Servis</label>
-            <input type="datetime-local" value={assignForm.scheduled_date} onChange={e => setAssignForm({...assignForm, scheduled_date: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" />
+            <input type="datetime-local" value={assignForm.scheduled_date} onChange={e => setAssignForm({ ...assignForm, scheduled_date: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" />
           </div>
           <div>
             <label className="block text-sm font-medium text-brand mb-1">Deskripsi Keluhan / Masalah</label>
-            <textarea value={assignForm.issue_description} onChange={e => setAssignForm({...assignForm, issue_description: e.target.value})} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" placeholder="Jelaskan detail kerusakan..."></textarea>
+            <textarea value={assignForm.issue_description} onChange={e => setAssignForm({ ...assignForm, issue_description: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" placeholder="Jelaskan detail kerusakan..."></textarea>
           </div>
           <button onClick={handleAssign} className="w-full py-2.5 bg-brand text-white rounded-lg text-sm font-semibold hover:bg-brand/90 transition cursor-pointer">Tugaskan Sekarang</button>
         </div>
@@ -1078,22 +1051,22 @@ function PeralatanPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-gray-100 p-5">
           <div className="flex items-center justify-between mb-3">
-             <p className="text-xs text-warm-gray uppercase tracking-wide font-medium">Peralatan Operasional</p>
-             <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-semibold">98% Sehat</span>
+            <p className="text-xs text-warm-gray uppercase tracking-wide font-medium">Peralatan Operasional</p>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-semibold">98% Sehat</span>
           </div>
-           <p className="text-2xl font-bold text-brand">142 <span className="text-sm font-normal text-warm-gray">item</span></p>
+          <p className="text-2xl font-bold text-brand">142 <span className="text-sm font-normal text-warm-gray">item</span></p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-5">
           <div className="flex items-center justify-between mb-3">
-             <p className="text-xs text-warm-gray uppercase tracking-wide font-medium">Perlu Service</p>
-             <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-semibold">Dijadwalkan Jumat</span>
+            <p className="text-xs text-warm-gray uppercase tracking-wide font-medium">Perlu Service</p>
+            <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-semibold">Dijadwalkan Jumat</span>
           </div>
           <p className="text-2xl font-bold text-brand">4</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-5">
           <div className="flex items-center justify-between mb-3">
-             <p className="text-xs text-warm-gray uppercase tracking-wide font-medium">Rusak / Pensiun</p>
-             <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-semibold">Menunggu penggantian</span>
+            <p className="text-xs text-warm-gray uppercase tracking-wide font-medium">Rusak / Pensiun</p>
+            <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-semibold">Menunggu penggantian</span>
           </div>
           <p className="text-2xl font-bold text-brand">2</p>
         </div>
@@ -1102,16 +1075,16 @@ function PeralatanPage() {
       {/* Gear Database */}
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-           <h2 className="text-sm font-semibold text-brand">Database Peralatan</h2>
+          <h2 className="text-sm font-semibold text-brand">Database Peralatan</h2>
           <div className="flex items-center gap-3">
             <select className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs bg-white text-warm-gray focus:outline-none focus:ring-2 focus:ring-accent/30">
-               <option>Semua Studio</option>
+              <option>Semua Studio</option>
               <option>Studio 1</option>
             </select>
             <select className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs bg-white text-warm-gray focus:outline-none focus:ring-2 focus:ring-accent/30">
-               <option>Urut: Nama</option>
-               <option>Urut: Kondisi</option>
-               <option>Urut: Service Terakhir</option>
+              <option>Urut: Nama</option>
+              <option>Urut: Kondisi</option>
+              <option>Urut: Service Terakhir</option>
             </select>
           </div>
         </div>
@@ -1119,12 +1092,12 @@ function PeralatanPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-warm-gray-light uppercase tracking-wide border-b border-gray-100 bg-cream/50">
-                 <th className="px-5 py-3">Nama Item</th>
-                 <th className="px-5 py-3">Kategori</th>
-                 <th className="px-5 py-3">Studio</th>
-                 <th className="px-5 py-3">Kondisi</th>
-                 <th className="px-5 py-3">Service Terakhir</th>
-                 <th className="px-5 py-3">Aksi</th>
+                <th className="px-5 py-3">Nama Item</th>
+                <th className="px-5 py-3">Kategori</th>
+                <th className="px-5 py-3">Studio</th>
+                <th className="px-5 py-3">Kondisi</th>
+                <th className="px-5 py-3">Service Terakhir</th>
+                <th className="px-5 py-3">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -1147,7 +1120,7 @@ function PeralatanPage() {
                   <td className="px-5 py-3">
                     <StatusBadge status={g.status} />
                   </td>
-                  <td className="px-5 py-3 text-warm-gray">{g.updated_at ? g.updated_at.substring(0,10) : "-"}</td>
+                  <td className="px-5 py-3 text-warm-gray">{g.updated_at ? g.updated_at.substring(0, 10) : "-"}</td>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2">
                       {(g.status === 'Service' || g.status === 'Broken') && (
@@ -1167,7 +1140,7 @@ function PeralatanPage() {
         </div>
         {/* Pagination */}
         <div className="px-5 py-3 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
-           <span className="text-warm-gray-light">Menampilkan {filtered.length} hasil</span>
+          <span className="text-warm-gray-light">Menampilkan {filtered.length} hasil</span>
           <div className="flex items-center gap-1">
             <button className="p-1.5 rounded-lg border border-gray-200 text-warm-gray hover:bg-cream transition cursor-pointer">
               <ChevronLeft size={16} />
@@ -1200,10 +1173,7 @@ function LaporanPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("auth_token");
-        const res = await axios.get("http://localhost:8000/api/admin/stats", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get("/admin/stats");
         if (res.data.success) {
           setReportData(prev => ({
             ...prev,
@@ -1224,12 +1194,12 @@ function LaporanPage() {
       toast("Tidak ada data untuk diunduh.", "error");
       return;
     }
-    
+
     const headers = ["ID Transaksi", "Nama Klien", "Unit Studio", "Status", "Jumlah"];
-    const rows = reportData.recentTransactions.map(t => 
+    const rows = reportData.recentTransactions.map(t =>
       `${t.id},"${t.client}","${t.studio}",${t.status},"${t.amount}"`
     );
-    
+
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");

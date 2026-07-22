@@ -175,18 +175,10 @@ export default function Equipment() {
                             </div>
                           ))}
                         </div>
-                        {qty ? (
-                          <div className="flex items-center justify-between border-2 border-accent rounded-full py-1 px-2">
-                            <button onClick={() => handleQty(item.id, -1)} className="w-8 h-8 rounded-full bg-accent/10 text-accent font-bold hover:bg-accent hover:text-white transition cursor-pointer">−</button>
-                            <span className="font-bold text-dark-brown">{qty}</span>
-                            <button onClick={() => handleQty(item.id, 1)} className="w-8 h-8 rounded-full bg-accent/10 text-accent font-bold hover:bg-accent hover:text-white transition cursor-pointer">+</button>
-                          </div>
-                        ) : (
-                          <button onClick={() => handleAdd(item)}
-                            className={`w-full rounded-full py-2 text-sm font-semibold transition-all cursor-pointer active:scale-95 ${item.ctaVariant === "primary" ? "bg-accent text-white hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/20" : "border-2 border-gray-300 text-gray-600 hover:border-accent hover:text-accent"}`}>
-                            {item.ctaLabel}
-                          </button>
-                        )}
+                        <button onClick={() => setFlippedCard(item.id)}
+                          className="w-full border-2 border-gray-300 text-gray-700 hover:border-accent hover:text-accent rounded-full py-2 text-sm font-semibold transition-all cursor-pointer active:scale-95">
+                          Lihat Detail Alat
+                        </button>
                       </div>
                     </div>
 
@@ -212,15 +204,10 @@ export default function Equipment() {
                           </div>
                           <p className="text-xs text-warm-gray">Kategori: <span className="font-semibold text-dark-brown">{item.category}</span></p>
                         </div>
-                        <div className="flex gap-2 mt-4">
-                          <button onClick={() => setFlippedCard(null)} className="flex-1 border-2 border-gray-300 text-gray-600 rounded-full py-2 text-sm font-semibold hover:border-dark-brown hover:text-dark-brown transition cursor-pointer active:scale-95">
+                        <div className="mt-4">
+                          <button onClick={() => setFlippedCard(null)} className="w-full border-2 border-gray-300 text-gray-600 rounded-full py-2 text-sm font-semibold hover:border-dark-brown hover:text-dark-brown transition cursor-pointer active:scale-95">
                             ← Kembali
                           </button>
-                          {item.available && (
-                            <button onClick={() => { handleAdd(item); setFlippedCard(null); }} className="flex-1 bg-accent text-white rounded-full py-2 text-sm font-semibold hover:bg-accent-dark transition cursor-pointer active:scale-95">
-                              Tambah ke Sesi
-                            </button>
-                          )}
                         </div>
                       </div>
                     )}

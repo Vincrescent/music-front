@@ -42,56 +42,58 @@ function ArrowLeftIcon() {
   );
 }
 
-/* ── Static week data ─────────────────────────────────────────── */
-const weekDays = [
-  { day: "SEN", date: 14, full: "Senin, 14 Okt 2024" },
-  { day: "SEL", date: 15, full: "Selasa, 15 Okt 2024" },
-  { day: "RAB", date: 16, full: "Rabu, 16 Okt 2024" },
-  { day: "KAM", date: 17, full: "Kamis, 17 Okt 2024" },
-  { day: "JUM", date: 18, full: "Jumat, 18 Okt 2024" },
-  { day: "SAB", date: 19, full: "Sabtu, 19 Okt 2024" },
-  { day: "MIN", date: 20, full: "Minggu, 20 Okt 2024" },
-];
+/* ── Dynamic week data ─────────────────────────────────────────── */
+export function getUpcomingDays(count = 7) {
+  const dayNames = ["MIN", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB"];
+  const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  const fullDayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  
+  const today = new Date();
+  const list = [];
+  
+  for (let i = 0; i < count; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+    list.push({
+      day: dayNames[d.getDay()],
+      date: d.getDate(),
+      full: `${fullDayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`,
+      iso: d.toISOString().split("T")[0],
+      isToday: i === 0,
+      monthYear: `${monthNames[d.getMonth()]} ${d.getFullYear()}`,
+      rawDate: d
+    });
+  }
+  return list;
+}
 
 /* ── Calendar Component ───────────────────────────────────────── */
-function WeekCalendar({ selectedDate, onDateSelect }) {
+function WeekCalendar({ selectedDayInfo, onDateSelect }) {
+  const days = getUpcomingDays(7);
+  const currentMonthYear = days[0]?.monthYear || "Jadwal Minggu Ini";
+
   return (
     <div className="border border-gray-200 rounded-xl p-5 md:p-6 bg-white">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2 text-dark-brown">
           <CalendarIcon />
-          <span className="font-semibold text-lg">Oktober 2024</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            className="p-1.5 rounded-lg hover:bg-cream-dark transition text-warm-gray"
-          >
-            <ChevronLeftIcon />
-          </button>
-          <button
-            type="button"
-            className="p-1.5 rounded-lg hover:bg-cream-dark transition text-warm-gray"
-          >
-            <ChevronRightIcon />
-          </button>
+          <span className="font-semibold text-lg">{currentMonthYear}</span>
         </div>
       </div>
 
       {/* Week grid */}
       <div className="grid grid-cols-7 gap-2">
-        {weekDays.map((wd) => {
-          const isSelected = selectedDate === wd.date;
+        {days.map((wd) => {
+          const isSelected = selectedDayInfo?.iso === wd.iso;
           return (
             <button
-              key={wd.date}
+              key={wd.iso}
               type="button"
-              onClick={() => onDateSelect(wd.date)}
+              onClick={() => onDateSelect(wd)}
               className={`
-                flex flex-col items-center rounded-xl p-2 md:p-3 transition-all
+                flex flex-col items-center rounded-xl p-2 md:p-3 transition-all cursor-pointer
                 ${isSelected
-                  ? "border-2 border-accent text-accent bg-accent/5"
+                  ? "border-2 border-accent text-accent bg-accent/5 font-bold shadow-sm"
                   : "border border-gray-200 text-dark-brown hover:border-accent/40 hover:bg-cream-dark"}
               `}
             >
@@ -101,6 +103,9 @@ function WeekCalendar({ selectedDate, onDateSelect }) {
               <span className={`text-base md:text-lg font-bold mt-0.5 ${isSelected ? "text-accent" : ""}`}>
                 {wd.date}
               </span>
+              {wd.isToday && (
+                <span className="text-[9px] bg-accent/10 text-accent px-1 rounded mt-0.5 font-semibold">HARI INI</span>
+              )}
             </button>
           );
         })}
@@ -110,7 +115,9 @@ function WeekCalendar({ selectedDate, onDateSelect }) {
 }
 
 /* ── Time Slot Section ────────────────────────────────────────── */
-function TimeSlotGroup({ groupKey, group, selectedSlot, onSlotSelect }) {
+function TimeSlotGroup({ groupKey, group, selectedSlot, onSlotSelect, selectedDayInfo }) {
+  const now = new Date();
+
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -121,7 +128,21 @@ function TimeSlotGroup({ groupKey, group, selectedSlot, onSlotSelect }) {
         {group.slots.map((slot) => {
           const label = `${slot.start} - ${slot.end}`;
           const isSelected = selectedSlot === label;
-          const isAvailable = slot.available;
+          
+          let isAvailable = slot.available;
+          let isTooMepet = false;
+
+          // Batas margin persiapan pemesanan (Minimal 2 Jam dari waktu sekarang)
+          if (selectedDayInfo?.isToday) {
+            const [startH, startM] = slot.start.split(":").map(Number);
+            const slotStartTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startH, startM);
+            const minBufferTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 Jam buffer
+
+            if (slotStartTime < minBufferTime) {
+              isAvailable = false;
+              isTooMepet = true;
+            }
+          }
 
           return (
             <button
@@ -130,13 +151,14 @@ function TimeSlotGroup({ groupKey, group, selectedSlot, onSlotSelect }) {
               disabled={!isAvailable}
               onClick={() => isAvailable && onSlotSelect(label)}
               className={`
-                rounded-lg px-4 py-2 text-sm font-medium transition-all
+                rounded-lg px-4 py-2 text-sm font-medium transition-all relative
                 ${isSelected
                   ? "bg-[#8B6914] text-white shadow-md"
                   : isAvailable
                   ? "border border-accent text-accent hover:bg-accent hover:text-white cursor-pointer"
-                  : "bg-gray-100 text-gray-400 cursor-not-allowed"}
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed line-through opacity-70"}
               `}
+              title={isTooMepet ? "Terlalu mepet (Minimal H+2 jam dari waktu sekarang)" : (!isAvailable ? "Waktu tidak tersedia" : "")}
             >
               {label}
             </button>
@@ -150,19 +172,24 @@ function TimeSlotGroup({ groupKey, group, selectedSlot, onSlotSelect }) {
 /* ── Legend ────────────────────────────────────────────────────── */
 function SlotLegend() {
   return (
-    <div className="flex items-center gap-5 mt-6 pt-4 border-t border-gray-100">
-      <div className="flex items-center gap-2 text-xs text-warm-gray">
-        <span className="w-6 h-6 rounded-md border border-accent" />
-        Tersedia
+    <div className="space-y-2 mt-6 pt-4 border-t border-gray-100">
+      <div className="flex items-center gap-5 flex-wrap">
+        <div className="flex items-center gap-2 text-xs text-warm-gray">
+          <span className="w-5 h-5 rounded-md border border-accent inline-block" />
+          Tersedia
+        </div>
+        <div className="flex items-center gap-2 text-xs text-warm-gray">
+          <span className="w-5 h-5 rounded-md bg-[#8B6914] inline-block" />
+          Terpilih
+        </div>
+        <div className="flex items-center gap-2 text-xs text-warm-gray">
+          <span className="w-5 h-5 rounded-md bg-gray-100 inline-block" />
+          Penuh / Melewati Margin
+        </div>
       </div>
-      <div className="flex items-center gap-2 text-xs text-warm-gray">
-        <span className="w-6 h-6 rounded-md bg-[#8B6914]" />
-        Terpilih
-      </div>
-      <div className="flex items-center gap-2 text-xs text-warm-gray">
-        <span className="w-6 h-6 rounded-md bg-gray-100" />
-        Penuh
-      </div>
+      <p className="text-[11px] text-warm-gray-light">
+        💡 *Pemesanan hari ini memerlukan margin persiapan minimal **2 jam** sebelum sesi dimulai.*
+      </p>
     </div>
   );
 }
@@ -176,7 +203,7 @@ function BookingSummary({
   onBack,
 }) {
   const dateLabel = selectedDate
-    ? weekDays.find((w) => w.date === selectedDate)?.full ?? "—"
+    ? (typeof selectedDate === "object" ? selectedDate.full : selectedDate)
     : "—";
 
   const estimatedPrice = selectedStudio
@@ -278,12 +305,10 @@ export default function StepJadwal({
   onNext,
   onBack,
 }) {
-  const activeDateNum =
-    typeof selectedDate === "number"
-      ? selectedDate
-      : selectedDate instanceof Date
-      ? selectedDate.getDate()
-      : null;
+  const days = getUpcomingDays(7);
+  const selectedDayInfo = typeof selectedDate === "object" && selectedDate !== null
+    ? selectedDate
+    : (days.find(d => d.date === selectedDate || d.iso === selectedDate) || days[0]);
 
   return (
     <section className="w-full">
@@ -303,7 +328,7 @@ export default function StepJadwal({
         <div className="lg:col-span-2 space-y-6">
           {/* Calendar */}
           <WeekCalendar
-            selectedDate={activeDateNum}
+            selectedDayInfo={selectedDayInfo}
             onDateSelect={onDateSelect}
           />
 
@@ -318,6 +343,7 @@ export default function StepJadwal({
                 group={group}
                 selectedSlot={selectedSlot}
                 onSlotSelect={onSlotSelect}
+                selectedDayInfo={selectedDayInfo}
               />
             ))}
 
@@ -330,7 +356,7 @@ export default function StepJadwal({
           <div className="lg:sticky lg:top-24">
             <BookingSummary
               selectedStudio={selectedStudio}
-              selectedDate={activeDateNum}
+              selectedDate={selectedDayInfo}
               selectedSlot={selectedSlot}
               onNext={onNext}
               onBack={onBack}

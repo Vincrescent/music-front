@@ -53,6 +53,12 @@ export default function StepKontak({
         {/* ─── LEFT: Form Card ──────────────────────────── */}
         <div className="lg:col-span-3 space-y-5">
           <div className="border rounded-xl p-6 md:p-8 bg-white">
+            {contactData.isAutoFilled && (
+              <div className="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-2.5 text-xs text-emerald-800 font-medium">
+                <span className="text-sm">✓</span>
+                <span>Data kontak terisi otomatis dari akun Anda ({contactData.email}).</span>
+              </div>
+            )}
             {/* Row 1 – Name + WhatsApp */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Nama Lengkap */}

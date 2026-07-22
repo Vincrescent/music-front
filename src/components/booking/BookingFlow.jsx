@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../../utils/axiosConfig";
-import { X, CheckCircle, PartyPopper } from "lucide-react";
+import { X, CheckCircle, PartyPopper, Lock } from "lucide-react";
 import { studios } from "../../data/booking";
 import Stepper from "./Stepper";
 import StepStudio from "./StepStudio";
@@ -8,6 +8,7 @@ import StepJadwal from "./StepJadwal";
 import StepKontak from "./StepKontak";
 import StepBayar from "./StepBayar";
 import Footer from "../Footer";
+import LoginModal from "../LoginModal";
 
 const STEP_LABELS = [
   "Pilih Studio",
@@ -19,15 +20,27 @@ const STEP_LABELS = [
 export default function BookingFlow({ onClose }) {
   /* ── state ─────────────────────────────────────────────── */
   const [currentStep, setCurrentStep] = useState(1);
+  const [showLoginNotice, setShowLoginNotice] = useState(() => !localStorage.getItem("token") && !localStorage.getItem("auth_token"));
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [selectedStudio, setSelectedStudio] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [contactData, setContactData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    notes: "",
-    agreed: false,
+  const [contactData, setContactData] = useState(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        return {
+          name: u.name || u.username || "",
+          phone: u.phone || u.whatsapp || "081234567890",
+          email: u.email || "",
+          notes: "",
+          agreed: true,
+          isAutoFilled: true
+        };
+      } catch (e) {}
+    }
+    return { name: "", phone: "", email: "", notes: "", agreed: false, isAutoFilled: false };
   });
   const [paymentMethod, setPaymentMethod] = useState("bank");
   const [errors, setErrors] = useState({});
@@ -70,7 +83,7 @@ export default function BookingFlow({ onClose }) {
     try {
       const token = localStorage.getItem("token") || localStorage.getItem("auth_token");
       if (!token) {
-        setBookingError("Silakan login terlebih dahulu untuk melakukan booking.");
+        setShowLoginNotice(true);
         return;
       }
       
@@ -78,9 +91,10 @@ export default function BookingFlow({ onClose }) {
       const endTime = selectedSlot.split(" - ")[1];
       const totalPrice = selectedStudio?.priceMin || 75000;
       
-      const dateInt = typeof selectedDate === "number" ? selectedDate : 14;
-      const dayString = dateInt < 10 ? `0${dateInt}` : `${dateInt}`;
-      const formattedDate = `2026-10-${dayString}`;
+      const todayIso = new Date().toISOString().split("T")[0];
+      const formattedDate = typeof selectedDate === "string" && selectedDate.includes("-") 
+        ? selectedDate 
+        : (selectedDate?.iso || todayIso);
 
       const studioId = (selectedStudio?.id && selectedStudio.id <= 3) ? selectedStudio.id : 1;
 
@@ -334,6 +348,55 @@ export default function BookingFlow({ onClose }) {
           </div>
         </div>
       )}
+
+      {/* ─── Centered Login Required Modal ──────────────────────── */}
+      {showLoginNotice && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center relative overflow-hidden border border-amber-200">
+            {/* Top Warning Strip */}
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-400 via-accent to-amber-400" />
+            
+            <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-700 mx-auto mb-4 flex items-center justify-center shadow-inner">
+              <Lock size={32} />
+            </div>
+
+            <h3 className="text-xl font-bold text-dark-brown mb-2">
+              Silakan Login Terlebih Dahulu
+            </h3>
+
+            <p className="text-sm text-warm-gray mb-6 leading-relaxed">
+              Untuk melakukan pemesanan studio dan menyimpan riwayat pemesanan Anda, silakan masuk ke akun Anda terlebih dahulu.
+            </p>
+
+            <div className="flex flex-col gap-2.5">
+              <button
+                onClick={() => {
+                  setShowLoginNotice(false);
+                  setShowLoginModal(true);
+                }}
+                className="w-full bg-accent hover:bg-accent-dark text-white rounded-xl py-3 font-semibold text-sm transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95"
+              >
+                Masuk / Login Akun
+              </button>
+              <button
+                onClick={() => setShowLoginNotice(false)}
+                className="w-full border border-gray-300 rounded-xl py-2.5 text-sm font-medium text-warm-gray hover:bg-gray-50 transition cursor-pointer"
+              >
+                Lanjut Lihat-Lihat Dulu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={() => {
+          setShowLoginModal(false);
+          setShowLoginNotice(false);
+        }}
+      />
     </div>
   );
 }

@@ -43,9 +43,9 @@ function DownloadModal({ open, onClose, type }) {
         {/* Icon */}
         <div className="w-16 h-16 mx-auto mb-4 rounded-xl flex items-center justify-center" style={{ background: isPDF ? "#FEE2E2" : "#DCFCE7" }}>
           {isPDF ? (
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" fill="#DC2626"/><text x="12" y="15" textAnchor="middle" fill="white" fontSize="6" fontWeight="bold">PDF</text></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" fill="#DC2626" /><text x="12" y="15" textAnchor="middle" fill="white" fontSize="6" fontWeight="bold">PDF</text></svg>
           ) : (
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" fill="#16A34A"/><text x="12" y="15" textAnchor="middle" fill="white" fontSize="5" fontWeight="bold">XLSX</text></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" fill="#16A34A" /><text x="12" y="15" textAnchor="middle" fill="white" fontSize="5" fontWeight="bold">XLSX</text></svg>
           )}
         </div>
 
@@ -108,7 +108,7 @@ function PageDashboard({ stats = {} }) {
     window.addEventListener("storage", loadReports);
     return () => window.removeEventListener("storage", loadReports);
   }, []);
-  
+
   return (
     <>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -117,14 +117,14 @@ function PageDashboard({ stats = {} }) {
           <p className="text-warm-gray text-sm mt-1">Wawasan tingkat tinggi & pelacakan kinerja studio Anda.</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-2 border rounded-lg px-3 py-2 text-sm text-warm-gray bg-white shadow-xs"><Calendar size={14}/>Bulan Ini</span>
+          <span className="flex items-center gap-2 border rounded-lg px-3 py-2 text-sm text-warm-gray bg-white shadow-xs"><Calendar size={14} />Bulan Ini</span>
           <button onClick={() => {
             const el = document.createElement('a');
             el.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent('Laporan PDF Dashboard Pemilik 2026'));
             el.setAttribute('download', 'Laporan_Dashboard_2026.pdf');
             el.click();
             toast("Laporan PDF berhasil diunduh!", "success");
-          }} className="bg-accent text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-accent-dark transition cursor-pointer flex items-center gap-2 shadow-xs"><Download size={14}/>Download Laporan</button>
+          }} className="bg-accent text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-accent-dark transition cursor-pointer flex items-center gap-2 shadow-xs"><Download size={14} />Download Laporan</button>
         </div>
       </div>
 
@@ -132,7 +132,7 @@ function PageDashboard({ stats = {} }) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard label="TOTAL PENDAPATAN HARI INI" value={stats.dailyRevenue || ownerStats.totalRevenue} />
         <StatCard label="TOTAL BOOKING HARI INI" value={stats.totalBookingToday || ownerStats.totalBookings} />
-        <StatCard label="STUDIO AKTIF" value={stats.activeStudios || ownerStats.activeStudios} note={ownerStats.activeStudiosNote}/>
+        <StatCard label="STUDIO AKTIF" value={stats.activeStudios || ownerStats.activeStudios} note={ownerStats.activeStudiosNote} />
         <StatCard label="MENUNGGU VALIDASI" value={stats.pendingValidation || 0} />
       </div>
 
@@ -154,7 +154,7 @@ function PageDashboard({ stats = {} }) {
                   <span className="font-bold text-dark-brown">{s.pct}%</span>
                 </div>
                 <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-2 rounded-full bg-accent transition-all duration-500" style={{ width: `${s.pct}%` }}/>
+                  <div className="h-2 rounded-full bg-accent transition-all duration-500" style={{ width: `${s.pct}%` }} />
                 </div>
               </div>
             ))}
@@ -208,7 +208,7 @@ function PageDashboard({ stats = {} }) {
                 Status: {selectedReport.type}
               </span>
             </div>
-            
+
             <div className="p-6 space-y-4 text-sm">
               <div className="flex justify-between border-b pb-3 border-gray-100">
                 <span className="text-warm-gray">Dikirim Oleh</span>
@@ -223,7 +223,7 @@ function PageDashboard({ stats = {} }) {
                 <span className="font-semibold text-dark-brown text-right max-w-[200px]">Data operasional telah divalidasi dan tersinkronisasi.</span>
               </div>
             </div>
-            
+
             <div className="p-6 pt-0">
               <button onClick={() => setSelectedReport(null)} className="w-full bg-accent text-white py-2.5 rounded-xl text-xs font-bold hover:bg-accent-dark transition cursor-pointer">
                 Tutup Ringkasan
@@ -250,7 +250,7 @@ function PageLaporan() {
   const handleDownloadPDF = () => {
     const csvContent = "Periode,Pendapatan,Biaya,Laba Bersih,Pertumbuhan\n" +
       listData.map(row => `${row.period},${row.revenue},${row.expense},${row.profit},${row.growth}`).join("\n");
-    
+
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -267,7 +267,7 @@ function PageLaporan() {
   const handleDownloadExcel = () => {
     const csvContent = "Periode,Pendapatan,Biaya,Laba Bersih,Pertumbuhan\n" +
       listData.map(row => `${row.period},${row.revenue},${row.expense},${row.profit},${row.growth}`).join("\n");
-    
+
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
