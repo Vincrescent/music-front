@@ -21,6 +21,15 @@ const avatarColors = [
   "bg-orange-500", "bg-emerald-600", "bg-violet-600", "bg-rose-500",
 ];
 
+export const getImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('/storage/')) {
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api').replace(/\/api\/?$/, '');
+    return `${baseUrl}${url}`;
+  }
+  return url;
+};
+
 function AvatarImage({ src, name, className = "" }) {
   const [failed, setFailed] = useState(false);
   const initials = name
@@ -30,12 +39,6 @@ function AvatarImage({ src, name, className = "" }) {
     .join("")
     .toUpperCase();
   const colorIdx = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % avatarColors.length;
-
-  const getImageUrl = (url) => {
-    if (!url) return null;
-    if (url.startsWith('/storage/')) return `http://127.0.0.1:8000${url}`;
-    return url;
-  };
 
   if (src && !failed) {
     return (
