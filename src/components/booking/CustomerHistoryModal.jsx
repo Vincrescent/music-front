@@ -18,12 +18,17 @@ export default function CustomerHistoryModal({ isOpen, onClose, onNewBooking }) 
       if (res.data.success && Array.isArray(res.data.data)) {
         let userBookings = res.data.data;
         if (user) {
-          userBookings = userBookings.filter(
-            (b) =>
-              b.user_id === user.id ||
-              (b.user && b.user.email === user.email) ||
-              (b.customer_email && b.customer_email.toLowerCase() === user.email?.toLowerCase())
-          );
+          userBookings = userBookings.filter((b) => {
+            const isSameUserId = user.id && (String(b.user_id) === String(user.id) || (b.user && String(b.user.id) === String(user.id)));
+            const isSameEmail = user.email && (
+              (b.user && b.user.email && b.user.email.toLowerCase() === user.email.toLowerCase()) ||
+              (b.customer_email && b.customer_email.toLowerCase() === user.email.toLowerCase())
+            );
+            const isSameName = user.name && b.customer_name && b.customer_name.toLowerCase() === user.name.toLowerCase();
+            return isSameUserId || isSameEmail || isSameName;
+          });
+        } else {
+          userBookings = [];
         }
         setBookings(userBookings);
       }

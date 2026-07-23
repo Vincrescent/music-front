@@ -79,7 +79,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-cream dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
       <Navbar
         onBookNow={() => setCurrentView('booking')}
         onLogin={(role, user) => {

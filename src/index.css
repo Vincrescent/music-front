@@ -32,6 +32,106 @@ body {
   color: #374151;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ─── FULL DARK MODE SYSTEM ─── */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0f172a !important; /* Slate 900 */
+  color: #f3f4f6 !important;
+}
+
+/* Background overrides for dark mode */
+html.dark .bg-cream,
+html.dark [class*="bg-cream"] {
+  background-color: #0f172a !important;
+}
+
+html.dark .bg-cream-dark {
+  background-color: #1e293b !important; /* Slate 800 */
+}
+
+html.dark .bg-white {
+  background-color: #1e293b !important;
+  color: #f3f4f6 !important;
+}
+
+html.dark .bg-gray-50 {
+  background-color: #0f172a !important;
+}
+
+html.dark .bg-dark-section {
+  background-color: #090d16 !important;
+}
+
+/* Text color overrides for dark mode */
+html.dark .text-dark-brown {
+  color: #f3f4f6 !important;
+}
+
+html.dark .text-warm-gray {
+  color: #9ca3af !important;
+}
+
+html.dark .text-warm-gray-light {
+  color: #6b7280 !important;
+}
+
+html.dark .text-brand {
+  color: #fbbf24 !important; /* Amber 400 */
+}
+
+html.dark .text-gray-900 {
+  color: #f3f4f6 !important;
+}
+
+html.dark .text-gray-800 {
+  color: #e5e7eb !important;
+}
+
+html.dark .text-gray-700 {
+  color: #d1d5db !important;
+}
+
+html.dark .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+/* Border overrides for dark mode */
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300,
+html.dark .border-cream-dark {
+  border-color: #334155 !important; /* Slate 700 */
+}
+
+/* Accent light badges */
+html.dark .bg-peach {
+  background-color: #334155 !important;
+  color: #fbbf24 !important;
+}
+
+html.dark .bg-accent-light {
+  background-color: #334155 !important;
+  color: #fbbf24 !important;
+}
+
+/* Input, Select, Textarea in Dark Mode */
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #0f172a !important;
+  color: #f3f4f6 !important;
+  border-color: #334155 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #6b7280 !important;
 }
 
 /* Custom scrollbar */
@@ -41,9 +141,15 @@ body {
 ::-webkit-scrollbar-track {
   background: var(--color-cream);
 }
+html.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
 ::-webkit-scrollbar-thumb {
   background: var(--color-warm-gray-light);
   border-radius: 4px;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-warm-gray);
