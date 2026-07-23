@@ -44,16 +44,10 @@ export default function StepBayar({
   /* ── helpers ───────────────────────────────────────────── */
   const formatDate = (d) => {
     if (!d) return "-";
-    const dateMap = {
-      14: "Senin, 14 Okt 2026",
-      15: "Selasa, 15 Okt 2026",
-      16: "Rabu, 16 Okt 2026",
-      17: "Kamis, 17 Okt 2026",
-      18: "Jumat, 18 Okt 2026",
-      19: "Sabtu, 19 Okt 2026",
-      20: "Minggu, 20 Okt 2026",
-    };
-    return dateMap[d] || `${d} Okt 2026`;
+    if (typeof d === "object" && d !== null) {
+      return d.full || d.iso || "-";
+    }
+    return String(d);
   };
 
   const slotLabel = selectedSlot ? selectedSlot : "-";
@@ -67,18 +61,18 @@ export default function StepBayar({
 
   /* ── render ────────────────────────────────────────────── */
   return (
-    <section className="max-w-6xl mx-auto px-4 py-8">
+    <section className="w-full">
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* ─── LEFT Column ──────────────────────────────── */}
         <div className="lg:col-span-3 space-y-6">
           {/* Payment methods card */}
-          <div className="border rounded-xl p-6 md:p-8 bg-white shadow-xs">
+          <div className="border border-gray-200 dark:border-slate-800 rounded-xl p-6 md:p-8 bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 shadow-sm">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-accent-light flex items-center justify-center">
-                <Wallet size={20} className="text-accent" />
+              <div className="w-10 h-10 rounded-full bg-accent/10 dark:bg-amber-400/20 flex items-center justify-center">
+                <Wallet size={20} className="text-accent dark:text-amber-400" />
               </div>
-              <h2 className="text-xl font-bold text-dark-brown">
+              <h2 className="text-xl font-bold text-dark-brown dark:text-white">
                 Metode Pembayaran
               </h2>
             </div>
@@ -91,12 +85,12 @@ export default function StepBayar({
                   onClick={() => onPaymentMethodChange(method.id)}
                   className={`rounded-xl p-4 text-center cursor-pointer transition ${
                     paymentMethod === method.id
-                      ? "border-2 border-accent bg-accent-light"
-                      : "border border-gray-200 hover:border-accent"
+                      ? "border-2 border-accent dark:border-amber-400 bg-accent/10 dark:bg-amber-400/10 font-bold"
+                      : "border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-accent dark:hover:border-amber-400"
                   }`}
                 >
                   <span className="text-3xl block mb-2">{method.icon}</span>
-                  <span className="text-sm font-medium text-dark-brown">
+                  <span className="text-sm font-medium text-dark-brown dark:text-gray-200">
                     {method.label}
                   </span>
                 </button>
@@ -105,10 +99,10 @@ export default function StepBayar({
           </div>
 
           {/* Voucher & Promo Code Section */}
-          <div className="border rounded-xl p-6 bg-white shadow-xs">
+          <div className="border border-gray-200 dark:border-slate-800 rounded-xl p-6 bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
-              <Tag size={18} className="text-accent" />
-              <h3 className="font-bold text-dark-brown text-base">Gunakan Kode Promo / Voucher</h3>
+              <Tag size={18} className="text-accent dark:text-amber-400" />
+              <h3 className="font-bold text-dark-brown dark:text-white text-base">Gunakan Kode Promo / Voucher</h3>
             </div>
             <div className="flex gap-2">
               <input
@@ -116,37 +110,37 @@ export default function StepBayar({
                 placeholder="Masukkan Kode (e.g. STUDIO2026)"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value)}
-                className="flex-1 border rounded-xl px-4 py-2.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-accent/30"
+                className="flex-1 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-xl px-4 py-2.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-accent/30 dark:focus:ring-amber-400/30"
               />
               <button
                 type="button"
                 onClick={handleApplyPromo}
-                className="bg-accent text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-accent-dark transition cursor-pointer"
+                className="bg-accent dark:bg-amber-500 text-white dark:text-slate-950 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-accent-dark dark:hover:bg-amber-400 transition cursor-pointer shadow-sm"
               >
                 Gunakan
               </button>
             </div>
             {appliedPromo && (
-              <div className="mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-emerald-800 text-xs font-semibold">
+              <div className="mt-3 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center gap-2 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
                 <CheckCircle2 size={16} /> Kode "{appliedPromo.code}" Berhasil Dipasang: {appliedPromo.label}
               </div>
             )}
             {promoError && (
-              <p className="mt-2 text-xs text-red-500 font-medium">{promoError}</p>
+              <p className="mt-2 text-xs text-red-500 dark:text-red-400 font-medium">{promoError}</p>
             )}
           </div>
 
           {/* Payment instructions */}
-          <div className="border border-peach rounded-xl p-5 bg-amber-light">
+          <div className="border border-amber-200 dark:border-amber-900/50 rounded-xl p-5 bg-amber-50 dark:bg-amber-950/30">
             <div className="flex items-start gap-3 mb-3">
-              <div className="w-7 h-7 rounded-full bg-amber flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-full bg-amber-500 flex items-center justify-center shrink-0">
                 <Info size={14} className="text-white" />
               </div>
-              <h3 className="font-semibold text-dark-brown text-sm">
+              <h3 className="font-semibold text-dark-brown dark:text-amber-200 text-sm">
                 Instruksi Pembayaran
               </h3>
             </div>
-            <ol className="list-decimal list-inside space-y-2 text-sm text-warm-gray leading-relaxed ml-10">
+            <ol className="list-decimal list-inside space-y-2 text-sm text-warm-gray dark:text-gray-300 leading-relaxed ml-10">
               {paymentInstructions.map((item, idx) => (
                 <li key={idx}>{item}</li>
               ))}
@@ -156,8 +150,8 @@ export default function StepBayar({
 
         {/* ─── RIGHT Column: Ringkasan Pesanan ──────────── */}
         <div className="lg:col-span-2">
-          <div className="border rounded-xl p-6 bg-white sticky top-24 shadow-xs">
-            <h2 className="text-xl font-bold text-dark-brown mb-5">
+          <div className="border border-gray-200 dark:border-slate-800 rounded-xl p-6 bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 sticky top-24 shadow-sm">
+            <h2 className="text-xl font-bold text-dark-brown dark:text-white mb-5">
               Ringkasan Pesanan
             </h2>
 
@@ -169,63 +163,63 @@ export default function StepBayar({
                 className="w-16 h-16 rounded-lg object-cover"
               />
               <div>
-                <p className="font-semibold text-dark-brown text-sm">
+                <p className="font-semibold text-dark-brown dark:text-white text-sm">
                   {selectedStudio?.name || "Studio 1"}
                 </p>
-                <p className="text-xs text-warm-gray-light mt-0.5">
+                <p className="text-xs text-warm-gray-light dark:text-gray-400 mt-0.5">
                   {formatDate(selectedDate)}
                 </p>
-                <p className="text-xs font-semibold text-accent mt-0.5">
+                <p className="text-xs font-semibold text-accent dark:text-amber-400 mt-0.5">
                   {slotLabel}
                 </p>
               </div>
             </div>
 
-            <hr className="border-gray-200 mb-4" />
+            <hr className="border-gray-200 dark:border-slate-800 mb-4" />
 
             {/* Price breakdown */}
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-warm-gray">Harga Sewa (2 Jam)</span>
-                <span className="text-dark-brown font-medium">
+                <span className="text-warm-gray dark:text-gray-400">Harga Sewa (2 Jam)</span>
+                <span className="text-dark-brown dark:text-gray-200 font-medium">
                   Rp {fmt(basePrice)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-warm-gray">Peralatan Tambahan</span>
-                <span className="text-dark-brown font-medium">
+                <span className="text-warm-gray dark:text-gray-400">Peralatan Tambahan</span>
+                <span className="text-dark-brown dark:text-gray-200 font-medium">
                   Rp {fmt(equipmentFee)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-warm-gray">Biaya Layanan</span>
-                <span className="text-dark-brown font-medium">
+                <span className="text-warm-gray dark:text-gray-400">Biaya Layanan</span>
+                <span className="text-dark-brown dark:text-gray-200 font-medium">
                   Rp {fmt(serviceFee)}
                 </span>
               </div>
               {appliedPromo && (
-                <div className="flex justify-between text-emerald-600 font-semibold">
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
                   <span>Diskon Promo ({appliedPromo.code})</span>
                   <span>- Rp {fmt(appliedPromo.discount)}</span>
                 </div>
               )}
             </div>
 
-            <hr className="border-gray-200 my-4" />
+            <hr className="border-gray-200 dark:border-slate-800 my-4" />
 
             {/* Total */}
             <div className="flex items-center justify-between mb-5">
-              <span className="font-semibold text-dark-brown">
+              <span className="font-semibold text-dark-brown dark:text-gray-200">
                 Total Pembayaran
               </span>
-              <span className="text-xl font-bold text-accent">
+              <span className="text-xl font-bold text-accent dark:text-amber-400">
                 Rp {fmt(total)}
               </span>
             </div>
 
             {/* Ref ID badge */}
-            <div className="bg-gray-100 rounded-lg px-4 py-2 mb-5">
-              <p className="text-xs text-gray-500 text-center leading-relaxed">
+            <div className="bg-gray-100 dark:bg-slate-800 rounded-lg px-4 py-2 mb-5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
                 REF ID: BK-TXN-2026-001 &bull; RELATION 1:1 BOOKING/TXN
               </p>
             </div>
@@ -233,14 +227,14 @@ export default function StepBayar({
             {/* Confirm button */}
             <button
               onClick={onConfirm}
-              className="bg-[#8B6914] hover:bg-dark-brown text-white w-full rounded-xl py-3.5 font-semibold text-base flex items-center justify-center gap-2 transition cursor-pointer"
+              className="bg-amber-600 dark:bg-amber-500 hover:bg-amber-700 dark:hover:bg-amber-400 text-white dark:text-slate-950 w-full rounded-xl py-3.5 font-bold text-base flex items-center justify-center gap-2 transition cursor-pointer shadow-md"
             >
               Konfirmasi &amp; Bayar
               <ArrowRight size={16} />
             </button>
 
             {/* Security badge */}
-            <p className="text-xs text-warm-gray-light text-center flex items-center justify-center gap-1 mt-3">
+            <p className="text-xs text-warm-gray-light dark:text-gray-400 text-center flex items-center justify-center gap-1 mt-3">
               <Lock size={12} /> Pembayaran Aman &amp; Terenkripsi
             </p>
           </div>

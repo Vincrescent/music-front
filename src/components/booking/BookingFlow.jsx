@@ -54,6 +54,28 @@ export default function BookingFlow({ onClose }) {
     } else {
       document.documentElement.classList.remove("dark");
     }
+
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        let rawPhone = u.phone || u.whatsapp || u.customer_phone || "";
+        if (rawPhone.startsWith("+62")) rawPhone = rawPhone.replace("+62", "").trim();
+        else if (rawPhone.startsWith("62")) rawPhone = rawPhone.replace(/^62/, "").trim();
+        else if (rawPhone.startsWith("0")) rawPhone = rawPhone.replace(/^0/, "").trim();
+
+        setContactData((prev) => ({
+          ...prev,
+          name: prev.name || u.name || u.username || "",
+          phone: prev.phone && prev.phone !== "081234567890" ? prev.phone : (rawPhone || "81234567890"),
+          email: prev.email || u.email || "",
+          agreed: true,
+          isAutoFilled: true,
+        }));
+      } catch (e) {
+        console.error("Failed to parse user for booking autofill", e);
+      }
+    }
   }, []);
 
   /* ── handlers ──────────────────────────────────────────── */
