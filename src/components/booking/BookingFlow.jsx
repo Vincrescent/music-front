@@ -210,16 +210,16 @@ export default function BookingFlow({ onClose }) {
 
   /* ── layout ────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen flex flex-col bg-cream">
+    <div className="min-h-screen flex flex-col bg-cream dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
       {/* ─── Simplified Navbar ──────────────────────────── */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <span className="text-brand font-bold text-lg tracking-tight">
+      <header className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <span className="text-brand dark:text-amber-400 font-bold text-lg tracking-tight">
             Studio Musik Lantai Atas
           </span>
           <button
             onClick={handleCancel}
-            className="flex items-center gap-1.5 text-sm text-warm-gray hover:text-red-500 transition cursor-pointer"
+            className="flex items-center gap-1.5 text-sm text-warm-gray dark:text-gray-400 hover:text-red-500 transition cursor-pointer"
           >
             <X size={16} />
             Batalkan
@@ -229,21 +229,25 @@ export default function BookingFlow({ onClose }) {
 
       {/* Error Notification Banner */}
       {bookingError && (
-        <div className="bg-red-50 border-b border-red-200 px-4 py-3 text-center text-red-700 text-sm font-semibold flex items-center justify-center gap-2">
+        <div className="bg-red-50 dark:bg-red-950/60 border-b border-red-200 dark:border-red-900 px-4 py-3 text-center text-red-700 dark:text-red-300 text-sm font-semibold flex items-center justify-center gap-2">
           <span>⚠️ {bookingError}</span>
           <button onClick={() => setBookingError("")} className="text-xs text-red-500 underline ml-2 cursor-pointer">Tutup</button>
         </div>
       )}
 
       {/* ─── Stepper ────────────────────────────────────── */}
-      <Stepper
-        steps={STEP_LABELS}
-        currentStep={currentStep}
-        onStepClick={handleStepClick}
-      />
+      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <Stepper
+          steps={STEP_LABELS}
+          currentStep={currentStep}
+          onStepClick={handleStepClick}
+        />
+      </div>
 
       {/* ─── Main Content ───────────────────────────────── */}
-      <main className="flex-1">{renderStep()}</main>
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        {renderStep()}
+      </main>
 
       {/* ─── Footer ─────────────────────────────────────── */}
       <Footer />

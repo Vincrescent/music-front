@@ -72,10 +72,10 @@ function WeekCalendar({ selectedDayInfo, onDateSelect }) {
   const currentMonthYear = days[0]?.monthYear || "Jadwal Minggu Ini";
 
   return (
-    <div className="border border-gray-200 rounded-xl p-5 md:p-6 bg-white">
+    <div className="border border-gray-200 dark:border-slate-800 rounded-xl p-5 md:p-6 bg-white dark:bg-slate-900">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2 text-dark-brown">
+        <div className="flex items-center gap-2 text-dark-brown dark:text-white">
           <CalendarIcon />
           <span className="font-semibold text-lg">{currentMonthYear}</span>
         </div>
@@ -93,18 +93,18 @@ function WeekCalendar({ selectedDayInfo, onDateSelect }) {
               className={`
                 flex flex-col items-center rounded-xl p-2 md:p-3 transition-all cursor-pointer
                 ${isSelected
-                  ? "border-2 border-accent text-accent bg-accent/5 font-bold shadow-sm"
-                  : "border border-gray-200 text-dark-brown hover:border-accent/40 hover:bg-cream-dark"}
+                  ? "border-2 border-accent dark:border-amber-400 text-accent dark:text-amber-400 bg-accent/10 dark:bg-amber-400/10 font-bold shadow-sm"
+                  : "border border-gray-200 dark:border-slate-800 text-dark-brown dark:text-gray-200 hover:border-accent/40 dark:hover:border-amber-400/40 hover:bg-cream-dark dark:hover:bg-slate-800"}
               `}
             >
-              <span className={`text-[10px] md:text-xs font-medium uppercase ${isSelected ? "text-accent" : "text-warm-gray"}`}>
+              <span className={`text-[10px] md:text-xs font-medium uppercase ${isSelected ? "text-accent dark:text-amber-400" : "text-warm-gray dark:text-gray-400"}`}>
                 {wd.day}
               </span>
-              <span className={`text-base md:text-lg font-bold mt-0.5 ${isSelected ? "text-accent" : ""}`}>
+              <span className={`text-base md:text-lg font-bold mt-0.5 ${isSelected ? "text-accent dark:text-amber-400" : "dark:text-white"}`}>
                 {wd.date}
               </span>
               {wd.isToday && (
-                <span className="text-[9px] bg-accent/10 text-accent px-1 rounded mt-0.5 font-semibold">HARI INI</span>
+                <span className="text-[9px] bg-accent/10 dark:bg-amber-400/20 text-accent dark:text-amber-300 px-1 rounded mt-0.5 font-semibold">HARI INI</span>
               )}
             </button>
           );
@@ -122,7 +122,7 @@ function TimeSlotGroup({ groupKey, group, selectedSlot, onSlotSelect, selectedDa
     <div>
       <div className="flex items-center gap-2 mb-3">
         <span className="text-lg">{group.icon}</span>
-        <span className="font-semibold text-dark-brown text-sm">{group.label}</span>
+        <span className="font-semibold text-dark-brown dark:text-white text-sm">{group.label}</span>
       </div>
       <div className="flex flex-wrap gap-2">
         {group.slots.map((slot) => {
@@ -153,10 +153,10 @@ function TimeSlotGroup({ groupKey, group, selectedSlot, onSlotSelect, selectedDa
               className={`
                 rounded-lg px-4 py-2 text-sm font-medium transition-all relative
                 ${isSelected
-                  ? "bg-[#8B6914] text-white shadow-md"
+                  ? "bg-amber-600 dark:bg-amber-500 text-white font-bold shadow-md"
                   : isAvailable
-                  ? "border border-accent text-accent hover:bg-accent hover:text-white cursor-pointer"
-                  : "bg-gray-100 text-gray-400 cursor-not-allowed line-through opacity-70"}
+                  ? "border border-accent dark:border-amber-400 text-accent dark:text-amber-400 hover:bg-accent dark:hover:bg-amber-400 hover:text-white dark:hover:text-slate-950 cursor-pointer"
+                  : "bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-gray-500 cursor-not-allowed line-through opacity-60"}
               `}
               title={isTooMepet ? "Terlalu mepet (Minimal H+2 jam dari waktu sekarang)" : (!isAvailable ? "Waktu tidak tersedia" : "")}
             >
@@ -172,22 +172,22 @@ function TimeSlotGroup({ groupKey, group, selectedSlot, onSlotSelect, selectedDa
 /* ── Legend ────────────────────────────────────────────────────── */
 function SlotLegend() {
   return (
-    <div className="space-y-2 mt-6 pt-4 border-t border-gray-100">
+    <div className="space-y-2 mt-6 pt-4 border-t border-gray-100 dark:border-slate-800">
       <div className="flex items-center gap-5 flex-wrap">
-        <div className="flex items-center gap-2 text-xs text-warm-gray">
-          <span className="w-5 h-5 rounded-md border border-accent inline-block" />
+        <div className="flex items-center gap-2 text-xs text-warm-gray dark:text-gray-400">
+          <span className="w-5 h-5 rounded-md border border-accent dark:border-amber-400 inline-block" />
           Tersedia
         </div>
-        <div className="flex items-center gap-2 text-xs text-warm-gray">
-          <span className="w-5 h-5 rounded-md bg-[#8B6914] inline-block" />
+        <div className="flex items-center gap-2 text-xs text-warm-gray dark:text-gray-400">
+          <span className="w-5 h-5 rounded-md bg-amber-600 dark:bg-amber-500 inline-block" />
           Terpilih
         </div>
-        <div className="flex items-center gap-2 text-xs text-warm-gray">
-          <span className="w-5 h-5 rounded-md bg-gray-100 inline-block" />
+        <div className="flex items-center gap-2 text-xs text-warm-gray dark:text-gray-400">
+          <span className="w-5 h-5 rounded-md bg-gray-100 dark:bg-slate-800 inline-block" />
           Penuh / Melewati Margin
         </div>
       </div>
-      <p className="text-[11px] text-warm-gray-light">
+      <p className="text-[11px] text-warm-gray-light dark:text-gray-400">
         💡 *Pemesanan hari ini memerlukan margin persiapan minimal **2 jam** sebelum sesi dimulai.*
       </p>
     </div>
@@ -213,13 +213,13 @@ function BookingSummary({
   const canProceed = selectedDate && selectedSlot;
 
   return (
-    <div className="border border-gray-200 rounded-xl p-5 md:p-6 bg-white">
+    <div className="border border-gray-200 dark:border-slate-800 rounded-xl p-5 md:p-6 bg-white dark:bg-slate-900">
       {/* Header */}
       <div className="flex items-center gap-2 mb-5">
-        <span className="text-accent">
+        <span className="text-accent dark:text-amber-400">
           <CartIcon />
         </span>
-        <h3 className="font-bold text-lg text-dark-brown">Ringkasan Booking</h3>
+        <h3 className="font-bold text-lg text-dark-brown dark:text-white">Ringkasan Booking</h3>
       </div>
 
       {/* Studio info */}
@@ -231,40 +231,40 @@ function BookingSummary({
             className="w-14 h-14 rounded-lg object-cover"
           />
           <div>
-            <p className="font-semibold text-dark-brown text-sm">
+            <p className="font-semibold text-dark-brown dark:text-white text-sm">
               {selectedStudio.name}
             </p>
-            <p className="text-xs text-warm-gray">{selectedStudio.priceRange}/Sesi</p>
+            <p className="text-xs text-warm-gray dark:text-gray-400">{selectedStudio.priceRange}/Sesi</p>
           </div>
         </div>
       )}
 
-      <div className="border-t border-gray-100 my-4" />
+      <div className="border-t border-gray-100 dark:border-slate-800 my-4" />
 
       {/* Detail rows */}
       <div className="space-y-3 text-sm">
         <div className="flex items-center justify-between">
-          <span className="text-warm-gray">Tanggal</span>
-          <span className="font-semibold text-dark-brown">{dateLabel}</span>
+          <span className="text-warm-gray dark:text-gray-400">Tanggal</span>
+          <span className="font-semibold text-dark-brown dark:text-gray-200">{dateLabel}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-warm-gray">Durasi</span>
-          <span className="font-semibold text-dark-brown">2 Jam</span>
+          <span className="text-warm-gray dark:text-gray-400">Durasi</span>
+          <span className="font-semibold text-dark-brown dark:text-gray-200">2 Jam</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-warm-gray">Sesi</span>
-          <span className="font-semibold text-dark-brown">
+          <span className="text-warm-gray dark:text-gray-400">Sesi</span>
+          <span className="font-semibold text-dark-brown dark:text-gray-200">
             {selectedSlot ?? "—"}
           </span>
         </div>
       </div>
 
-      <div className="border-t border-gray-100 my-4" />
+      <div className="border-t border-gray-100 dark:border-slate-800 my-4" />
 
       {/* Total */}
       <div className="flex items-center justify-between mb-6">
-        <span className="text-sm text-warm-gray">Total Estimasi</span>
-        <span className="text-xl font-bold text-accent">{estimatedPrice}</span>
+        <span className="text-sm text-warm-gray dark:text-gray-400">Total Estimasi</span>
+        <span className="text-xl font-bold text-accent dark:text-amber-400">{estimatedPrice}</span>
       </div>
 
       {/* Actions */}
@@ -275,8 +275,8 @@ function BookingSummary({
         className={`
           w-full rounded-xl py-3 font-semibold text-sm transition-all
           ${canProceed
-            ? "bg-accent text-white hover:bg-accent-dark shadow-md hover:shadow-lg cursor-pointer"
-            : "bg-gray-200 text-gray-400 cursor-not-allowed"}
+            ? "bg-accent hover:bg-accent-dark dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 font-bold shadow-md hover:shadow-lg cursor-pointer"
+            : "bg-gray-200 dark:bg-slate-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"}
         `}
       >
         Lanjut ke Pembayaran
@@ -285,8 +285,8 @@ function BookingSummary({
       <button
         type="button"
         onClick={onBack}
-        className="w-full mt-3 flex items-center justify-center gap-2 text-sm text-warm-gray
-                   hover:text-accent transition py-2 cursor-pointer"
+        className="w-full mt-3 flex items-center justify-center gap-2 text-sm text-warm-gray dark:text-gray-400
+                   hover:text-accent dark:hover:text-amber-400 transition py-2 cursor-pointer"
       >
         <ArrowLeftIcon />
         Kembali Pilih Studio
