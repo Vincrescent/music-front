@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import api from "../../utils/axiosConfig";
 import { X, Calendar, Clock, MapPin, CheckCircle, AlertCircle, RefreshCw, Plus } from "lucide-react";
 
@@ -51,32 +52,39 @@ export default function CustomerHistoryModal({ isOpen, onClose, onNewBooking }) 
   const getStatusBadge = (status) => {
     const s = (status || "").toUpperCase();
     if (s === "COMPLETED" || s === "SELESAI") {
-      return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1"><CheckCircle size={12} /> Selesai</span>;
+      return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1"><CheckCircle size={12} /> Selesai</span>;
     }
     if (s === "VALIDATED" || s === "CONFIRMED" || s === "TERVERIFIKASI") {
-      return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1"><CheckCircle size={12} /> Terverifikasi</span>;
+      return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800 flex items-center gap-1"><CheckCircle size={12} /> Terverifikasi</span>;
     }
     if (s === "CANCELLED" || s === "DIBATALKAN") {
-      return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">Dibatalkan</span>;
+      return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-950/80 dark:text-red-300 border border-red-200 dark:border-red-800">Dibatalkan</span>;
     }
-    return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1"><AlertCircle size={12} /> Menunggu Validasi</span>;
+    return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1"><AlertCircle size={12} /> Menunggu Validasi</span>;
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh]">
+  const modalContent = (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+        onClick={onClose} 
+      />
+
+      {/* Modal Dialog Box */}
+      <div className="relative bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh] border border-gray-200 dark:border-slate-800 z-10 my-auto animate-fadeIn">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-cream-dark/30">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-800 bg-cream-dark/30 dark:bg-slate-800/50">
           <div>
-            <h2 className="text-xl font-bold text-dark-brown flex items-center gap-2">
-              <Calendar className="text-accent" size={22} />
+            <h2 className="text-xl font-bold text-dark-brown dark:text-amber-400 flex items-center gap-2">
+              <Calendar className="text-accent dark:text-amber-400" size={22} />
               Riwayat Booking Saya
             </h2>
-            <p className="text-xs text-warm-gray mt-0.5">Daftar pemesanan studio musik Anda terbaru</p>
+            <p className="text-xs text-warm-gray dark:text-gray-400 mt-0.5">Daftar pemesanan studio musik Anda terbaru</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-warm-gray hover:text-dark-brown hover:bg-cream-dark transition cursor-pointer"
+            className="p-2 rounded-full text-warm-gray dark:text-gray-400 hover:text-dark-brown dark:hover:text-white hover:bg-cream-dark dark:hover:bg-slate-800 transition cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -85,12 +93,12 @@ export default function CustomerHistoryModal({ isOpen, onClose, onNewBooking }) 
         {/* Content */}
         <div className="p-6 overflow-y-auto space-y-4 flex-1">
           {loading ? (
-            <div className="py-12 text-center text-warm-gray flex flex-col items-center gap-2">
-              <RefreshCw className="animate-spin text-accent" size={28} />
+            <div className="py-12 text-center text-warm-gray dark:text-gray-400 flex flex-col items-center gap-2">
+              <RefreshCw className="animate-spin text-accent dark:text-amber-400" size={28} />
               <p className="text-sm font-medium">Memuat data booking Anda...</p>
             </div>
           ) : error ? (
-            <div className="py-8 text-center text-red-500 bg-red-50 rounded-xl p-4">
+            <div className="py-8 text-center text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/40 rounded-xl p-4 border border-red-200 dark:border-red-900">
               <p className="text-sm">{error}</p>
               <button
                 onClick={fetchUserBookings}
@@ -100,10 +108,10 @@ export default function CustomerHistoryModal({ isOpen, onClose, onNewBooking }) 
               </button>
             </div>
           ) : bookings.length === 0 ? (
-            <div className="py-12 text-center text-warm-gray bg-cream/40 rounded-xl p-8 border border-dashed border-gray-200">
-              <Calendar className="mx-auto text-warm-gray/40 mb-3" size={40} />
-              <h3 className="font-bold text-dark-brown text-base">Belum Ada Riwayat Booking</h3>
-              <p className="text-xs text-warm-gray mt-1 max-w-sm mx-auto">
+            <div className="py-12 text-center text-warm-gray dark:text-gray-400 bg-cream/40 dark:bg-slate-800/30 rounded-xl p-8 border border-dashed border-gray-200 dark:border-slate-800">
+              <Calendar className="mx-auto text-warm-gray/40 dark:text-gray-500 mb-3" size={40} />
+              <h3 className="font-bold text-dark-brown dark:text-gray-200 text-base">Belum Ada Riwayat Booking</h3>
+              <p className="text-xs text-warm-gray dark:text-gray-400 mt-1 max-w-sm mx-auto">
                 Anda belum pernah memesan studio. Pilih studio favorit Anda dan lakukan pemesanan sekarang!
               </p>
               <button
@@ -121,35 +129,35 @@ export default function CustomerHistoryModal({ isOpen, onClose, onNewBooking }) 
               {bookings.map((item) => (
                 <div
                   key={item.id}
-                  className="border border-gray-200 rounded-xl p-4 bg-white hover:border-accent/40 hover:shadow-md transition flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="border border-gray-200 dark:border-slate-800 rounded-xl p-4 bg-white dark:bg-slate-800/60 hover:border-accent/40 dark:hover:border-amber-500/40 hover:shadow-md transition flex flex-col md:flex-row md:items-center justify-between gap-4"
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-dark-brown text-base">
+                      <span className="font-bold text-dark-brown dark:text-white text-base">
                         {item.studio ? item.studio.name : `Studio #${item.studio_id || 1}`}
                       </span>
                       {getStatusBadge(item.status)}
                     </div>
 
-                    <div className="flex items-center gap-4 text-xs text-warm-gray flex-wrap">
+                    <div className="flex items-center gap-4 text-xs text-warm-gray dark:text-gray-300 flex-wrap">
                       <span className="flex items-center gap-1">
-                        <Calendar size={13} className="text-accent" />
+                        <Calendar size={13} className="text-accent dark:text-amber-400" />
                         {item.booking_date}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock size={13} className="text-accent" />
+                        <Clock size={13} className="text-accent dark:text-amber-400" />
                         {item.start_time} - {item.end_time}
                       </span>
                     </div>
 
-                    <p className="text-xs text-warm-gray-light">
-                      Pemesan: <span className="font-medium text-dark-brown">{item.customer_name || item.user?.name || "Pelanggan"}</span>
+                    <p className="text-xs text-warm-gray-light dark:text-gray-400">
+                      Pemesan: <span className="font-medium text-dark-brown dark:text-gray-200">{item.customer_name || item.user?.name || "Pelanggan"}</span>
                     </p>
                   </div>
 
-                  <div className="flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-3 md:pt-0 border-gray-100">
-                    <span className="text-xs text-warm-gray">Total Biaya</span>
-                    <span className="text-lg font-bold text-accent">
+                  <div className="flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-3 md:pt-0 border-gray-100 dark:border-slate-800">
+                    <span className="text-xs text-warm-gray dark:text-gray-400">Total Biaya</span>
+                    <span className="text-lg font-bold text-accent dark:text-amber-400">
                       Rp {Number(item.total_price || 85000).toLocaleString("id-ID")}
                     </span>
                   </div>
@@ -160,20 +168,20 @@ export default function CustomerHistoryModal({ isOpen, onClose, onNewBooking }) 
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+        <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/80 flex items-center justify-between">
           <button
             onClick={() => {
               onClose();
               onNewBooking?.();
             }}
-            className="text-sm font-semibold text-accent hover:text-accent-dark flex items-center gap-1 cursor-pointer"
+            className="text-sm font-semibold text-accent dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
           >
             <Plus size={16} /> Pesan Studio Baru
           </button>
 
           <button
             onClick={onClose}
-            className="px-5 py-2 text-sm font-medium border border-gray-300 rounded-xl text-warm-gray hover:bg-gray-100 transition cursor-pointer"
+            className="px-5 py-2 text-sm font-medium border border-gray-300 dark:border-slate-700 rounded-xl text-warm-gray dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition cursor-pointer"
           >
             Tutup
           </button>
@@ -181,4 +189,6 @@ export default function CustomerHistoryModal({ isOpen, onClose, onNewBooking }) 
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
