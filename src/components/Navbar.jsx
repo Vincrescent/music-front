@@ -100,15 +100,8 @@ export default function Navbar({ onBookNow, onLogin }) {
             setMobileOpen(false);
           }}
         >
-          {/* Music note icon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className={`h-6 w-6 ${darkMode ? 'text-amber-400' : 'text-accent'}`}
-          >
-            <path d="M19.952 1.651a.75.75 0 0 1 .298.599V16.5a3 3 0 0 1-2.25 2.905 3.75 3.75 0 1 1-1.5-2.905V7.94l-9 2.25V19.5a3 3 0 0 1-2.25 2.905 3.75 3.75 0 1 1-1.5-2.905V5.25a.75.75 0 0 1 .553-.724l12-3a.75.75 0 0 1 .697.125Z" />
-          </svg>
+          {/* Custom Studio Logo */}
+          <img src="/favicon.svg" alt="Studio Logo" className="w-8 h-8 rounded-lg shadow-sm object-cover" />
           <span className={`text-lg font-bold tracking-tight leading-tight ${darkMode ? 'text-amber-400' : 'text-brand'}`}>
             Studio Musik<span className="hidden sm:inline"> Lantai Atas</span>
           </span>

@@ -245,9 +245,12 @@ export default function BookingFlow({ onClose }) {
       {/* ─── Simplified Navbar ──────────────────────────── */}
       <header className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <span className="text-brand dark:text-amber-400 font-bold text-lg tracking-tight">
-            Studio Musik Lantai Atas
-          </span>
+          <div className="flex items-center gap-2.5">
+            <img src="/favicon.svg" alt="Studio Logo" className="w-8 h-8 rounded-lg shadow-sm object-cover" />
+            <span className="text-brand dark:text-amber-400 font-bold text-lg tracking-tight">
+              Studio Musik Lantai Atas
+            </span>
+          </div>
           <button
             onClick={handleCancel}
             className="flex items-center gap-1.5 text-sm text-warm-gray dark:text-gray-400 hover:text-red-500 transition cursor-pointer"

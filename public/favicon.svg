@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E1B18" />
+      <stop offset="100%" stop-color="#0F0E0C" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="50%" stop-color="#E67E22" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8B4513" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="url(#goldGrad)" stroke-width="8" opacity="0.4"/>
+
+  <!-- Vinyl Record Outer Ring -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#2D2926" stroke-width="32"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#3E3835" stroke-width="12"/>
+  <circle cx="256" cy="256" r="110" fill="none" stroke="#2D2926" stroke-width="8"/>
+
+  <!-- Center Label -->
+  <circle cx="256" cy="256" r="75" fill="url(#goldGrad)"/>
+  <circle cx="256" cy="256" r="22" fill="#0F0E0C"/>
+
+  <!-- Upward Stair / Floor Accent (Lantai Atas Motif) -->
+  <path d="M 120 370 L 200 370 L 200 310 L 280 310 L 280 250 L 360 250 L 360 140" fill="none" stroke="url(#goldGrad)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Floating Music Note Emblem -->
+  <path d="M 320 140 A 28 28 0 1 1 292 112 A 28 28 0 0 1 320 140 Z M 320 140 L 320 75 L 390 60 L 390 100 L 320 115" fill="url(#goldGrad)"/>
+</svg>
