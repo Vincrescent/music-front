@@ -47,6 +47,15 @@ export default function BookingFlow({ onClose }) {
   const [showCancel, setShowCancel] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("app_theme");
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
   /* ── handlers ──────────────────────────────────────────── */
 
   const handleStudioSelect = (studio) => {

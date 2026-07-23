@@ -60,15 +60,15 @@ function StudioCard({ studio, isSelected, onSelect }) {
       disabled={!isAvailable}
       onClick={() => isAvailable && onSelect(studio)}
       className={`
-        text-left w-full border rounded-2xl overflow-hidden bg-white shadow-sm
+        text-left w-full border rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm
         transition-all duration-300 hover:-translate-y-1 group flex flex-col justify-between h-full
         ${isAvailable ? "hover:shadow-xl cursor-pointer" : "opacity-50 cursor-not-allowed"}
-        ${isSelected ? "ring-2 ring-accent border-accent shadow-lg" : "border-gray-200 hover:border-accent/40"}
+        ${isSelected ? "ring-2 ring-accent dark:ring-amber-400 border-accent dark:border-amber-400 shadow-lg" : "border-gray-200 dark:border-slate-800 hover:border-accent/40 dark:hover:border-amber-400/40"}
       `}
     >
       <div>
         {/* Image */}
-        <div className="aspect-[16/10] overflow-hidden relative bg-gray-100">
+        <div className="aspect-[16/10] overflow-hidden relative bg-gray-100 dark:bg-slate-800">
           <img
             src={studio.image}
             alt={studio.name}
@@ -89,23 +89,23 @@ function StudioCard({ studio, isSelected, onSelect }) {
         <div className="p-6 md:p-7 space-y-3">
           {/* Name */}
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-xl text-dark-brown group-hover:text-accent transition-colors">{studio.name}</h3>
+            <h3 className="font-bold text-xl text-dark-brown dark:text-white group-hover:text-accent dark:group-hover:text-amber-400 transition-colors">{studio.name}</h3>
           </div>
 
           {/* Features line */}
-          <div className="flex items-center gap-4 text-sm text-warm-gray flex-wrap pt-1">
-            <span className="flex items-center gap-1.5 font-medium bg-cream px-2.5 py-1 rounded-lg">
+          <div className="flex items-center gap-4 text-sm text-warm-gray dark:text-gray-300 flex-wrap pt-1">
+            <span className="flex items-center gap-1.5 font-medium bg-cream dark:bg-slate-800 px-2.5 py-1 rounded-lg">
               <PersonIcon />
               {studio.capacity} Pax
             </span>
-            <span className="flex items-center gap-1.5 font-medium bg-cream px-2.5 py-1 rounded-lg">
+            <span className="flex items-center gap-1.5 font-medium bg-cream dark:bg-slate-800 px-2.5 py-1 rounded-lg">
               <AudioIcon />
               {studio.features[0]}
             </span>
           </div>
 
           {studio.facilities && (
-            <p className="text-xs text-warm-gray-light leading-relaxed pt-1">
+            <p className="text-xs text-warm-gray-light dark:text-gray-400 leading-relaxed pt-1">
               {studio.facilities}
             </p>
           )}
@@ -114,17 +114,17 @@ function StudioCard({ studio, isSelected, onSelect }) {
 
       {/* Bottom Footer */}
       <div className="px-6 pb-6 md:px-7 md:pb-7">
-        <div className="border-t border-gray-100 pt-4 flex items-center justify-between">
+        <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex items-center justify-between">
           <div>
-            <span className="text-xs text-warm-gray block">Tarif Sewa</span>
-            <span className="text-accent font-bold text-base md:text-lg">
+            <span className="text-xs text-warm-gray dark:text-gray-400 block">Tarif Sewa</span>
+            <span className="text-accent dark:text-amber-400 font-bold text-base md:text-lg">
               {studio.priceRange}
             </span>
           </div>
           <span className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
             isAvailable 
-              ? (isSelected ? "bg-accent text-white" : "bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white") 
-              : "bg-gray-100 text-gray-400"
+              ? (isSelected ? "bg-accent dark:bg-amber-500 text-white dark:text-slate-950 font-bold" : "bg-accent/10 dark:bg-amber-400/20 text-accent dark:text-amber-300 group-hover:bg-accent dark:group-hover:bg-amber-500 group-hover:text-white dark:group-hover:text-slate-950") 
+              : "bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-gray-500"
           }`}>
             Pilih Studio
             <ArrowRightIcon />
