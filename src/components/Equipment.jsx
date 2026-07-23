@@ -149,34 +149,34 @@ export default function Equipment() {
                 >
                   <div className={`relative w-full transition-transform duration-500 ${isFlipped ? "[transform:rotateY(180deg)]" : ""}`} style={{ transformStyle: "preserve-3d" }}>
                     {/* FRONT */}
-                    <div className={`group border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-shadow duration-300 ${isFlipped ? "invisible" : ""}`} style={{ backfaceVisibility: "hidden" }}>
-                      <div className="relative aspect-[4/3] bg-gradient-to-br from-peach via-cream-dark to-peach-dark overflow-hidden cursor-pointer" onClick={() => setFlippedCard(item.id)}>
+                    <div className={`group border border-gray-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl transition-shadow duration-300 ${isFlipped ? "invisible" : ""}`} style={{ backfaceVisibility: "hidden" }}>
+                      <div className="relative aspect-[4/3] bg-gradient-to-br from-peach via-cream-dark to-peach-dark dark:from-slate-800 dark:to-slate-900 overflow-hidden cursor-pointer" onClick={() => setFlippedCard(item.id)}>
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-                        <span className={`absolute top-3 right-3 flex items-center gap-1 text-xs font-medium rounded-full px-2 py-0.5 ${item.available ? "bg-green-500 text-white" : "bg-gray-400 text-white"}`}>
-                          <span className={`inline-block w-1.5 h-1.5 rounded-full ${item.available ? "bg-green-200" : "bg-gray-200"}`} />
+                        <span className={`absolute top-3 right-3 flex items-center gap-1 text-xs font-medium rounded-full px-2.5 py-1 ${item.available ? "bg-emerald-600 text-white" : "bg-gray-500 text-white"}`}>
+                          <span className={`inline-block w-1.5 h-1.5 rounded-full ${item.available ? "bg-emerald-200" : "bg-gray-200"}`} />
                           {item.available ? "Tersedia" : "Tidak Tersedia"}
                         </span>
                         {/* Hover overlay */}
-                        <div className="absolute inset-0 bg-dark-brown/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <span className="bg-white/90 text-dark-brown text-sm font-semibold px-4 py-2 rounded-full">🔄 Balik untuk detail</span>
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <span className="bg-white text-slate-900 text-sm font-bold px-4 py-2 rounded-full shadow-lg cursor-pointer">🔄 Balik untuk detail</span>
                         </div>
                       </div>
-                      <div className="p-4 bg-white rounded-b-xl">
+                      <div className="p-4 bg-white dark:bg-slate-900 rounded-b-xl">
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <h3 className="font-bold text-lg text-dark-brown truncate">{item.name}</h3>
-                          <span className="shrink-0 border border-gray-300 text-xs text-gray-500 rounded-full px-2 py-0.5">{item.category}</span>
+                          <h3 className="font-bold text-lg text-dark-brown dark:text-white truncate">{item.name}</h3>
+                          <span className="shrink-0 border border-gray-300 dark:border-slate-700 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-800 rounded-full px-2.5 py-0.5">{item.category}</span>
                         </div>
-                        <p className="text-accent text-sm mb-3">{item.subtitle}</p>
+                        <p className="text-accent dark:text-amber-400 text-sm font-medium mb-3">{item.subtitle}</p>
                         <div className="space-y-1 mb-4">
                           {item.specs.map((spec, i) => (
                             <div key={i} className="flex justify-between text-sm">
-                              <span className="text-gray-400">{spec.label}</span>
-                              <span className="font-bold text-dark-brown">{spec.value}</span>
+                              <span className="text-gray-500 dark:text-gray-400">{spec.label}</span>
+                              <span className="font-bold text-dark-brown dark:text-gray-100">{spec.value}</span>
                             </div>
                           ))}
                         </div>
                         <button onClick={() => setFlippedCard(item.id)}
-                          className="w-full border-2 border-gray-300 text-gray-700 hover:border-accent hover:text-accent rounded-full py-2 text-sm font-semibold transition-all cursor-pointer active:scale-95">
+                          className="w-full border-2 border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-200 hover:border-accent hover:text-accent dark:hover:border-amber-400 dark:hover:text-amber-400 rounded-full py-2 text-sm font-semibold transition-all cursor-pointer active:scale-95">
                           Lihat Detail Alat
                         </button>
                       </div>
@@ -184,28 +184,28 @@ export default function Equipment() {
 
                     {/* BACK */}
                     {isFlipped && (
-                      <div className="absolute inset-0 border border-accent/30 rounded-xl bg-white shadow-xl p-6 flex flex-col justify-between [transform:rotateY(180deg)]" style={{ backfaceVisibility: "hidden" }}>
+                      <div className="absolute inset-0 border border-accent/30 dark:border-amber-500/40 rounded-xl bg-white dark:bg-slate-900 shadow-xl p-6 flex flex-col justify-between [transform:rotateY(180deg)]" style={{ backfaceVisibility: "hidden" }}>
                         <div>
                           <div className="flex items-center justify-between mb-3">
-                            <h3 className="font-bold text-lg text-dark-brown">{item.name}</h3>
-                            <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${item.available ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                            <h3 className="font-bold text-lg text-dark-brown dark:text-white">{item.name}</h3>
+                            <span className={`text-xs font-medium rounded-full px-2.5 py-1 ${item.available ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-gray-400"}`}>
                               {item.available ? "✓ Tersedia" : "✗ Tidak Tersedia"}
                             </span>
                           </div>
-                          <p className="text-accent text-sm mb-4">{item.subtitle}</p>
-                          <div className="bg-cream rounded-lg p-4 space-y-2 mb-4">
-                            <p className="text-xs font-bold text-warm-gray uppercase">Spesifikasi Lengkap</p>
+                          <p className="text-accent dark:text-amber-400 text-sm mb-4">{item.subtitle}</p>
+                          <div className="bg-cream dark:bg-slate-800/80 rounded-lg p-4 space-y-2 mb-4 border border-transparent dark:border-slate-700">
+                            <p className="text-xs font-bold text-warm-gray dark:text-amber-400 uppercase">Spesifikasi Lengkap</p>
                             {item.specs.map((spec, i) => (
-                              <div key={i} className="flex justify-between text-sm border-b border-gray-100 pb-1 last:border-0">
-                                <span className="text-warm-gray">{spec.label}</span>
-                                <span className="font-bold text-dark-brown">{spec.value}</span>
+                              <div key={i} className="flex justify-between text-sm border-b border-gray-100 dark:border-slate-700 pb-1 last:border-0">
+                                <span className="text-warm-gray dark:text-gray-400">{spec.label}</span>
+                                <span className="font-bold text-dark-brown dark:text-gray-100">{spec.value}</span>
                               </div>
                             ))}
                           </div>
-                          <p className="text-xs text-warm-gray">Kategori: <span className="font-semibold text-dark-brown">{item.category}</span></p>
+                          <p className="text-xs text-warm-gray dark:text-gray-400">Kategori: <span className="font-semibold text-dark-brown dark:text-white">{item.category}</span></p>
                         </div>
                         <div className="mt-4">
-                          <button onClick={() => setFlippedCard(null)} className="w-full border-2 border-gray-300 text-gray-600 rounded-full py-2 text-sm font-semibold hover:border-dark-brown hover:text-dark-brown transition cursor-pointer active:scale-95">
+                          <button onClick={() => setFlippedCard(null)} className="w-full border-2 border-gray-300 dark:border-slate-700 text-gray-600 dark:text-gray-300 rounded-full py-2 text-sm font-semibold hover:border-dark-brown dark:hover:border-amber-400 hover:text-dark-brown dark:hover:text-amber-400 transition cursor-pointer active:scale-95">
                             ← Kembali
                           </button>
                         </div>

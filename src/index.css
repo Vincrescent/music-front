@@ -41,64 +41,60 @@ html.dark {
 }
 
 html.dark body {
-  background-color: #0f172a !important; /* Slate 900 */
-  color: #f3f4f6 !important;
+  background-color: #0f172a; /* Slate 900 */
+  color: #f3f4f6;
 }
 
 /* Background overrides for dark mode */
-html.dark .bg-cream,
-html.dark [class*="bg-cream"] {
-  background-color: #0f172a !important;
+html.dark .bg-cream {
+  background-color: #0f172a;
 }
 
 html.dark .bg-cream-dark {
-  background-color: #1e293b !important; /* Slate 800 */
+  background-color: #1e293b; /* Slate 800 */
 }
 
 html.dark .bg-white {
-  background-color: #1e293b !important;
-  color: #f3f4f6 !important;
+  background-color: #1e293b;
+  color: #f3f4f6;
 }
 
 html.dark .bg-gray-50 {
-  background-color: #0f172a !important;
+  background-color: #0f172a;
 }
 
 html.dark .bg-dark-section {
-  background-color: #090d16 !important;
+  background-color: #090d16;
 }
 
-/* Text color overrides for dark mode */
+/* White buttons/overlays inside dark mode must remain crisp dark text */
+html.dark .bg-white\/90,
+html.dark .bg-white\/95,
+html.dark .bg-white-overlay {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+}
+
+html.dark .bg-white\/90 *,
+html.dark .bg-white\/95 * {
+  color: #0f172a !important;
+}
+
+/* Text color defaults for dark mode */
 html.dark .text-dark-brown {
-  color: #f3f4f6 !important;
+  color: #f3f4f6;
 }
 
 html.dark .text-warm-gray {
-  color: #9ca3af !important;
+  color: #9ca3af;
 }
 
 html.dark .text-warm-gray-light {
-  color: #6b7280 !important;
+  color: #9ca3af;
 }
 
 html.dark .text-brand {
-  color: #fbbf24 !important; /* Amber 400 */
-}
-
-html.dark .text-gray-900 {
-  color: #f3f4f6 !important;
-}
-
-html.dark .text-gray-800 {
-  color: #e5e7eb !important;
-}
-
-html.dark .text-gray-700 {
-  color: #d1d5db !important;
-}
-
-html.dark .text-gray-600 {
-  color: #9ca3af !important;
+  color: #fbbf24; /* Amber 400 */
 }
 
 /* Border overrides for dark mode */
@@ -106,32 +102,32 @@ html.dark .border-gray-100,
 html.dark .border-gray-200,
 html.dark .border-gray-300,
 html.dark .border-cream-dark {
-  border-color: #334155 !important; /* Slate 700 */
+  border-color: #334155; /* Slate 700 */
 }
 
-/* Accent light badges */
+/* Category & Accent badges */
 html.dark .bg-peach {
-  background-color: #334155 !important;
-  color: #fbbf24 !important;
+  background-color: #334155;
+  color: #fbbf24;
 }
 
 html.dark .bg-accent-light {
-  background-color: #334155 !important;
-  color: #fbbf24 !important;
+  background-color: #334155;
+  color: #fbbf24;
 }
 
 /* Input, Select, Textarea in Dark Mode */
 html.dark input,
 html.dark select,
 html.dark textarea {
-  background-color: #0f172a !important;
-  color: #f3f4f6 !important;
-  border-color: #334155 !important;
+  background-color: #0f172a;
+  color: #f3f4f6;
+  border-color: #334155;
 }
 
 html.dark input::placeholder,
 html.dark textarea::placeholder {
-  color: #6b7280 !important;
+  color: #6b7280;
 }
 
 /* Custom scrollbar */
