@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../utils/axiosConfig';
 
@@ -9,6 +9,16 @@ export default function RegisterModal({ isOpen, onClose, onRegisterSuccess, onSw
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const savedTheme = localStorage.getItem('app_theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

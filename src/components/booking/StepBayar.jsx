@@ -57,7 +57,7 @@ export default function StepBayar({
   const serviceFee = 3000;
   const discountAmount = appliedPromo ? appliedPromo.discount : 0;
   const total = Math.max(0, basePrice + equipmentFee + serviceFee - discountAmount);
-  const fmt = (n) => n.toLocaleString("id-ID");
+  const fmt = (n) => (Number(n) || 0).toLocaleString("id-ID");
 
   /* ── render ────────────────────────────────────────────── */
   return (

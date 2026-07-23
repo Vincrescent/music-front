@@ -219,7 +219,7 @@ export default function StepKontak({
                 <span className="text-xl font-bold text-accent dark:text-amber-400">
                   Rp{" "}
                   {selectedStudio
-                    ? selectedStudio.priceMin.toLocaleString("id-ID")
+                    ? (Number(selectedStudio.priceMin || selectedStudio.price || 85000)).toLocaleString("id-ID")
                     : "85.000"}
                 </span>
               </div>
