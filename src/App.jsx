@@ -30,6 +30,13 @@ function AppContent() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem('app_theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
     const userStr = localStorage.getItem('user');
     const token = localStorage.getItem('token');
     if (userStr && token) {

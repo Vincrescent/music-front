@@ -12,7 +12,13 @@ export default function DashboardLayout({ menuItems, activePage, onPageChange, o
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    localStorage.setItem("app_theme", darkMode ? "dark" : "light");
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("app_theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("app_theme", "light");
+    }
   }, [darkMode]);
 
   const fetchLiveNotifications = async () => {
