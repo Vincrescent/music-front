@@ -129,44 +129,49 @@ export default function Navbar({ onBookNow, onLogin }) {
         </ul>
 
         {/* ── Right: Auth + Theme Switcher + CTA (desktop) ── */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-2">
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className={`p-2 rounded-xl border transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold ${
+            className={`p-2 rounded-xl border transition-colors cursor-pointer ${
               darkMode ? 'bg-gray-800 border-gray-700 text-amber-300 hover:bg-gray-750' : 'bg-white border-gray-200 text-warm-gray hover:bg-gray-100'
             }`}
-            title="Ganti Tema (Light/Dark Mode)"
+            title={darkMode ? 'Ganti ke Light Mode' : 'Ganti ke Dark Mode'}
           >
             {darkMode ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-amber-600" />}
-            <span>{darkMode ? 'Dark' : 'Light'}</span>
           </button>
           {user ? (
-            <div className="flex items-center gap-3">
+            <>
+              {/* Separator */}
+              <div className={`h-5 w-px mx-1 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`} />
               <button
                 onClick={() => setHistoryOpen(true)}
-                className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-accent/10 text-accent hover:bg-accent hover:text-white transition cursor-pointer border border-accent/30"
-                title="Lihat Riwayat Pemesanan Studio Anda"
+                className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                  darkMode ? 'bg-gray-800 border-gray-700 text-amber-300 hover:bg-gray-750' : 'bg-white border-gray-200 text-accent hover:bg-accent/10'
+                }`}
+                title="Riwayat Booking"
               >
-                <History size={14} />
-                Riwayat Booking
+                <History size={16} />
               </button>
               <button
                 onClick={() => setProfileOpen(true)}
-                className={`flex items-center gap-2 text-sm font-medium transition-colors cursor-pointer rounded-full px-3 py-1.5 ${
+                className={`flex items-center gap-1.5 text-sm font-medium transition-colors cursor-pointer rounded-full px-2.5 py-1.5 ${
                   darkMode ? 'text-amber-300 hover:bg-slate-800' : 'text-brand hover:bg-cream-dark'
                 }`}
                 title="Lihat & Edit Profil"
               >
                 <UserCircle size={18} className={darkMode ? 'text-amber-400' : 'text-accent'} />
-                Halo, {user.name || user.username}
+                <span className="hidden lg:inline max-w-[100px] truncate">{user.name || user.username}</span>
               </button>
+              {/* Separator */}
+              <div className={`h-5 w-px mx-1 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'}`} />
               <button
                 onClick={handleLogout}
                 className="text-sm font-medium text-red-500 hover:text-red-600 transition-colors cursor-pointer"
+                title="Keluar dari akun"
               >
                 Keluar
               </button>
-            </div>
+            </>
           ) : (
             <button
               onClick={() => setLoginOpen(true)}
