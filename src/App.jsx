@@ -94,7 +94,7 @@ function AppContent() {
           setCurrentView(role);
         }}
       />
-      <Hero />
+      <Hero onBookNow={() => setCurrentView('booking')} />
       <Facilities onBookSession={() => setCurrentView('booking')} />
       <Equipment />
       <Testimonials />
