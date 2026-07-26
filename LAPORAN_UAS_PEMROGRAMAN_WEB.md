@@ -79,9 +79,9 @@ Ruang lingkup sistem yang dikembangkan meliputi:
 
 | No | Nama | NIM | Tugas & Tanggung Jawab | Bobot |
 |----|------|-----|------------------------|-------|
-| 1 | [Nama Lengkap Anda] | [NIM Anda] | Frontend Architecture, Audio Visualizer, Profile System, Axios Interceptor | 34% |
-| 2 | [Nama Anggota 2] | [NIM Anggota 2] | Backend REST API (Laravel 11), Database Migration, Sanctum Auth | 33% |
-| 3 | [Nama Anggota 3] | [NIM Anggota 3] | Booking Multi-Step Flow, UI Components, Multi-Role Dashboards | 33% |
+| 1 | [Nama Lengkap Anda] | [NIM Anda] | Frontend Architecture, Audio Visualizer, Profile System, Axios Interceptor | 50% |
+| 2 | [Nama Anggota 2] | [NIM Anggota 2] | Backend REST API (Laravel 11), Database Migration, Sanctum Auth | 25% |
+| 3 | [Nama Anggota 3] | [NIM Anggota 3] | Booking Multi-Step Flow, UI Components, Multi-Role Dashboards | 25% |
 
 ---
 
@@ -471,6 +471,6 @@ final-pweb/
 
 | No | Nama | NIM | Detail Tugas Spesifik | Bobot Contribution |
 |----|------|-----|-----------------------|---------------------|
-| 1 | [Nama Lengkap Anda] | [NIM Anda] | Membangun UI/UX Frontend React, Canvas Visualizer, ProfileModal, Axios Interceptor | 34% |
-| 2 | [Nama Anggota 2] | [NIM Anggota 2] | Merancang Database Migrations, ProfileController, Sanctum Auth API, Eloquent Models | 33% |
-| 3 | [Nama Anggota 3] | [NIM Anggota 3] | Mengembangkan Stepper Booking Flow, Admin/Kasir/Teknisi/Pemilik Dashboards | 33% |
+| 1 | [Nama Lengkap Anda] | [NIM Anda] | Membangun UI/UX Frontend React, Canvas Visualizer, ProfileModal, Axios Interceptor | 50% |
+| 2 | [Nama Anggota 2] | [NIM Anggota 2] | Merancang Database Migrations, ProfileController, Sanctum Auth API, Eloquent Models | 25% |
+| 3 | [Nama Anggota 3] | [NIM Anggota 3] | Mengembangkan Stepper Booking Flow, Admin/Kasir/Teknisi/Pemilik Dashboards | 25% |
