@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Moon, Sun, History } from 'lucide-react';
+import { Moon, Sun, History, UserCircle } from 'lucide-react';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
+import ProfileModal from './ProfileModal';
 import CustomerHistoryModal from './booking/CustomerHistoryModal';
 
 const NAV_LINKS = [
@@ -16,6 +17,7 @@ export default function Navbar({ onBookNow, onLogin }) {
   const [loginOpen, setLoginOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [activeLink, setActiveLink] = useState('');
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
@@ -148,7 +150,16 @@ export default function Navbar({ onBookNow, onLogin }) {
                 <History size={14} />
                 Riwayat Booking
               </button>
-              <span className={`text-sm font-medium ${darkMode ? 'text-amber-300' : 'text-brand'}`}>Halo, {user.name || user.username}</span>
+              <button
+                onClick={() => setProfileOpen(true)}
+                className={`flex items-center gap-2 text-sm font-medium transition-colors cursor-pointer rounded-full px-3 py-1.5 ${
+                  darkMode ? 'text-amber-300 hover:bg-slate-800' : 'text-brand hover:bg-cream-dark'
+                }`}
+                title="Lihat & Edit Profil"
+              >
+                <UserCircle size={18} className={darkMode ? 'text-amber-400' : 'text-accent'} />
+                Halo, {user.name || user.username}
+              </button>
               <button
                 onClick={handleLogout}
                 className="text-sm font-medium text-red-500 hover:text-red-600 transition-colors cursor-pointer"
@@ -234,12 +245,21 @@ export default function Navbar({ onBookNow, onLogin }) {
 
           <li>
             {user ? (
-              <button
-                onClick={() => { setMobileOpen(false); handleLogout(); }}
-                className="w-full block rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-              >
-                Keluar ({user.name || user.username})
-              </button>
+              <div className="space-y-1">
+                <button
+                  onClick={() => { setMobileOpen(false); setProfileOpen(true); }}
+                  className="w-full flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-warm-gray hover:bg-cream-dark hover:text-brand transition-colors cursor-pointer"
+                >
+                  <UserCircle size={16} />
+                  Profil Saya
+                </button>
+                <button
+                  onClick={() => { setMobileOpen(false); handleLogout(); }}
+                  className="w-full block rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                >
+                  Keluar ({user.name || user.username})
+                </button>
+              </div>
             ) : (
               <button
                 onClick={() => { setMobileOpen(false); setLoginOpen(true); }}
@@ -287,6 +307,11 @@ export default function Navbar({ onBookNow, onLogin }) {
         isOpen={historyOpen}
         onClose={() => setHistoryOpen(false)}
         onNewBooking={onBookNow}
+      />
+      <ProfileModal
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        onProfileUpdate={(updatedUser) => setUser(updatedUser)}
       />
     </header>
   );
