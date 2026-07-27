@@ -69,19 +69,33 @@ const QUICK_REPLIES = [
 /* Smart offline response generator if API fails */
 function getOfflineMoonResponse(userMessage) {
   const msg = userMessage.toLowerCase();
-  if (msg.includes('studio') || msg.includes('kamar') || msg.includes('tipe')) {
+  
+  if (msg.includes('makan') || msg.includes('kuliner') || msg.includes('lapar') || msg.includes('minum') || msg.includes('snack') || msg.includes('kopi')) {
+    return 'Untuk makanan & minuman, di Studio Musik Lantai Atas kami menyediakan **kopi artisanal & camilan sehat gratis** di area Lounge! ☕🍪\n\nJika ingin makanan berat, di sekitar studio juga banyak tempat makan enak seperti Resto 24 Jam, Nasi Goreng, & Kafe nongkrong!';
+  }
+  if (msg.includes('studio') || msg.includes('kamar') || msg.includes('tipe') || msg.includes('ruang')) {
     return 'Studio Musik Lantai Atas punya 4 pilihan studio:\n• **Studio 1**: 10 orang, Full Head Cabinet (Rp 75k - 100k/jam)\n• **Studio 2**: 6 orang, Half Backline (Rp 50k - 75k/jam)\n• **Studio 3**: 15 orang, Full Head + Recording (Rp 100k - 150k/jam)\n• **Studio 4**: 4 orang, Acoustic (Rp 40k - 60k/jam)\n\nSilakan klik **Pesan Sekarang** untuk reservasi! 🎵';
   }
-  if (msg.includes('harga') || msg.includes('biaya') || msg.includes('tarif') || msg.includes('bayar')) {
+  if (msg.includes('harga') || msg.includes('biaya') || msg.includes('tarif') || msg.includes('bayar') || msg.includes('murah')) {
     return 'Harga sewa studio kami sangat terjangkau mulai dari **Rp 40.000/jam** (Studio 4 Akustik) hingga **Rp 150.000/jam** (Studio 3 Recording). Kami menerima pembayaran via Transfer Bank (BCA, Mandiri, BNI), E-Wallet, & QRIS! 💰';
   }
-  if (msg.includes('fasilitas') || msg.includes('alat') || msg.includes('spek') || msg.includes('mic')) {
+  if (msg.includes('fasilitas') || msg.includes('alat') || msg.includes('spek') || msg.includes('mic') || msg.includes('amp')) {
     return 'Fasilitas premium kami meliputi:\n• Bilik Rekaman Kedap Suara (-20dB floor)\n• Ruang Control Mixing dengan Genelec 8351B & Universal Audio Apollo\n• Wi-Fi Gigabit & Lounge nyaman\n• HVAC Senyap & Smart Access 24/7 🎧';
   }
   if (msg.includes('book') || msg.includes('pesan') || msg.includes('sewa') || msg.includes('jadwal') || msg.includes('slot')) {
     return 'Untuk pesan studio sangat mudah! 😊\n1. Klik tombol **Pesan Sekarang** di bagian atas menu.\n2. Pilih studio dan tanggal yang diinginkan.\n3. Pilih jam slot latihan & lakukan pembayaran.\n4. Konfirmasi booking kamu!';
   }
-  return 'Halo! Aku MOON 🌙. Ada yang bisa aku bantu seputar sewa studio, harga, fasilitas, atau jadwal booking di Studio Musik Lantai Atas? 🎵';
+  if (msg.includes('lokasi') || msg.includes('alamat') || msg.includes('dimana') || msg.includes('posisi')) {
+    return 'Kami berlokasi strategis di **Jakarta Central**! Akses mudah dengan parkir luas dan aman 24/7. 📍';
+  }
+  if (msg.includes('jam') || msg.includes('buka') || msg.includes('tutup') || msg.includes('operasional')) {
+    return 'Studio Musik Lantai Atas buka **setiap hari dari jam 09:00 WIB sampai 01:00 WIB dini hari**! ⏰';
+  }
+  if (msg.includes('halo') || msg.includes('hai') || msg.includes('pagi') || msg.includes('siang') || msg.includes('malam') || msg.includes('woi') || msg.includes('tes')) {
+    return 'Halo! Aku MOON 🌙. Ada yang bisa aku bantu seputar sewa studio, harga, fasilitas, saran makanan/minuman, atau jadwal booking di Studio Musik Lantai Atas? 🎵';
+  }
+
+  return `Untuk "${userMessage}", MOON sarankan kamu bisa nikmati fasilitas lounge kami atau konsultasi langsung dengan staf studio saat sesi latihan nanti! 🌙\n\nAda pertanyaan lain seputar sewa studio atau fasilitas? 🎵`;
 }
 
 /* ── Call OpenRouter with Model Fallbacks ── */
@@ -99,13 +113,13 @@ async function callMoonAI(userMessage, history) {
     { role: 'user', content: userMessage },
   ];
 
-  // Try list of reliable free model endpoints on OpenRouter
+  // List of reliable free model endpoints on OpenRouter
   const candidateModels = [
+    'meta-llama/llama-3.1-8b-instruct:free',
+    'google/gemini-2.0-flash-exp:free',
     'deepseek/deepseek-r1:free',
-    'meta-llama/llama-3.3-70b-instruct:free',
-    'google/gemini-2.0-flash-lite-preview-02-05:free',
-    'mistralai/mistral-7b-instruct:free',
-    'openrouter/auto',
+    'qwen/qwen-2.5-coder-32b-instruct:free',
+    'google/gemini-flash-1.5-8b:free',
   ];
 
   for (const model of candidateModels) {
