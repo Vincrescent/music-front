@@ -114,102 +114,41 @@ function ExpandableText({ text, maxLen = 120, className = "" }) {
   );
 }
 
-/* ── Default Card ── */
-function DefaultCard({ item }) {
+/* ── Uniform Testimonial Card ── */
+function TestimonialCard({ item }) {
   const photoUrl = item.image || (item.avatar && item.avatar.startsWith('/storage/') ? item.avatar : null);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-accent/20 cursor-default group">
+    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl overflow-hidden flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 cursor-default group">
+      {/* Optional Top Image */}
       {photoUrl && (
-        <div className="w-full h-44 overflow-hidden bg-gray-100">
-          <img src={getImageUrl(photoUrl)} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <div className="w-full h-48 overflow-hidden bg-gray-100 dark:bg-slate-900 shrink-0 relative">
+          <img
+            src={getImageUrl(photoUrl)}
+            alt={item.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
         </div>
       )}
+
+      {/* Card Body */}
       <div className="p-6 flex flex-col justify-between flex-1">
         <div>
           <Stars rating={item.rating} />
-          <ExpandableText text={item.text} className="text-warm-gray" />
+          <ExpandableText text={item.text} className="text-gray-600 dark:text-gray-300" maxLen={110} />
         </div>
-        <div className="flex items-center gap-3 mt-6">
-          <AvatarImage src={item.avatar} name={item.name} className="group-hover:ring-2 group-hover:ring-accent/30 transition" />
-          <div>
-            <p className="text-accent font-semibold text-sm">{item.name}</p>
-            <p className="text-gray-500 text-xs uppercase tracking-wide">{item.role || "Pengunjung Studio"}</p>
+
+        {/* User Info Footer */}
+        <div className="flex items-center gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-slate-700/60 shrink-0">
+          <AvatarImage src={item.avatar} name={item.name} className="group-hover:ring-2 group-hover:ring-accent/40 transition shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="text-brand dark:text-amber-400 font-semibold text-sm truncate">{item.name}</p>
+            <p className="text-gray-400 dark:text-gray-500 text-xs tracking-wide truncate">{item.role || "Pengunjung Studio"}</p>
           </div>
         </div>
       </div>
     </div>
   );
-}
-
-/* ── Highlight Card ── */
-function HighlightCard({ item }) {
-  return (
-    <div className="bg-accent text-white rounded-xl p-6 flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:shadow-accent/30 hover:-translate-y-2 cursor-default">
-      <div>
-        <span className="block text-5xl font-serif opacity-50 leading-none mb-2">&#x201C;&#x201C;</span>
-        <ExpandableText text={item.text} className="text-white/90" maxLen={150} />
-      </div>
-      <div className="flex items-center gap-3 mt-6">
-        <div className="w-10 h-10 rounded-full border-2 border-white/60 flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-          </svg>
-        </div>
-        <div>
-          <p className="font-semibold text-sm">{item.name}</p>
-          <p className="text-white/70 text-xs uppercase tracking-wide">{item.role || "Pengunjung Studio"}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Featured Card ── */
-function FeaturedCard({ item }) {
-  const [imgHover, setImgHover] = useState(false);
-  const photoUrl = item.image || item.avatar;
-
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-default group">
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100" onMouseEnter={() => setImgHover(true)} onMouseLeave={() => setImgHover(false)}>
-        {photoUrl ? (
-          <img src={getImageUrl(photoUrl)} alt="Sesi studio" className={`w-full h-full object-cover transition-transform duration-500 ${imgHover ? "scale-110" : "scale-100"}`} />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-amber-100 via-orange-200 to-amber-300 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 text-amber-500/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z" />
-            </svg>
-          </div>
-        )}
-        {item.badge && (
-          <span className="absolute bottom-3 left-3 bg-accent text-white text-xs px-3 py-1 rounded-full font-medium">{item.badge}</span>
-        )}
-      </div>
-      <div className="p-6 flex flex-col flex-1 justify-between">
-        <div>
-          <Stars rating={item.rating} />
-          <ExpandableText text={item.text} className="text-warm-gray" maxLen={100} />
-        </div>
-        <div className="flex items-center gap-3 mt-6">
-          <AvatarImage src={item.avatar} name={item.name} className="group-hover:ring-2 group-hover:ring-accent/30 transition" />
-          <div>
-            <p className="text-accent font-semibold text-sm">{item.name}</p>
-            <p className="text-gray-500 text-xs uppercase tracking-wide">{item.role || "Pengunjung Studio"}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Card dispatcher ── */
-function TestimonialCard({ item }) {
-  switch (item.variant) {
-    case "highlight": return <HighlightCard item={item} />;
-    case "featured": return <FeaturedCard item={item} />;
-    default: return <DefaultCard item={item} />;
-  }
 }
 
 /* ── Interactive Review Form ── */
@@ -395,17 +334,13 @@ export default function Testimonials() {
           </div>
         </div>
 
-        {/* ── Bento Grid ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:grid-rows-[auto_auto] auto-rows-fr">
-          {reviews.map((item, idx) => {
-            if (idx === 0) return <div key={item.id} className="md:col-start-1 md:row-start-1"><TestimonialCard item={item} /></div>;
-            if (idx === 1) return <div key={item.id} className="md:col-start-1 md:row-start-2"><TestimonialCard item={item} /></div>;
-            if (idx === 2) return <div key={item.id} className="md:col-start-2 md:row-start-1 md:row-span-2"><TestimonialCard item={item} /></div>;
-            if (idx === 3) return <div key={item.id} className="md:col-start-3 md:row-start-1"><TestimonialCard item={item} /></div>;
-            if (idx === 4) return <div key={item.id} className="md:col-start-3 md:row-start-2"><TestimonialCard item={item} /></div>;
-
-            return <div key={item.id} className="md:col-span-1"><TestimonialCard item={item} /></div>;
-          })}
+        {/* ── Uniform Grid ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {reviews.map((item) => (
+            <div key={item.id} className="h-full">
+              <TestimonialCard item={item} />
+            </div>
+          ))}
         </div>
 
         {/* ── Review Form ── */}
