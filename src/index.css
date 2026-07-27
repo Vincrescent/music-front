@@ -266,3 +266,30 @@ html.dark .moon-chat-scrollbar::-webkit-scrollbar-thumb {
 .moon-badge-bounce {
   animation: moon-badge-bounce 0.6s ease-out;
 }
+
+/* Message content formatting */
+.moon-msg-content strong {
+  font-weight: 600;
+}
+
+.moon-msg-content ul.moon-list {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 2px 0;
+}
+
+.moon-msg-content ul.moon-list li {
+  padding: 2px 0;
+}
+
+.moon-msg-assistant ul.moon-list li {
+  color: #4b5563;
+}
+
+html.dark .moon-msg-assistant ul.moon-list li {
+  color: #d1d5db;
+}
+
+.moon-msg-user ul.moon-list li {
+  color: rgba(255, 255, 255, 0.95);
+}

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Sparkles, Moon, ChevronDown } from 'lucide-react';
+import { MessageCircle, X, Send, Sparkles, ChevronDown } from 'lucide-react';
 import api from '../utils/axiosConfig';
 
 /* ────────────────────────────────────────────────────────
@@ -9,7 +9,7 @@ import api from '../utils/axiosConfig';
 const WELCOME_MESSAGE = {
   id: 'welcome',
   role: 'assistant',
-  text: 'Halo! Aku **MOON** 🌙, asisten virtual Studio Musik Lantai Atas.\n\nAku bisa bantu kamu tentang:\n🎵 Info studio & harga\n🎤 Fasilitas & peralatan\n📅 Cara booking\n❓ Pertanyaan lainnya\n\nAda yang bisa aku bantu hari ini?',
+  text: 'Halo! Aku **MOON** 🌙, asisten virtual Studio Musik Lantai Atas.\n\nAku bisa bantu kamu tentang:\n• 🎵 Info studio & harga\n• 🎤 Fasilitas & peralatan\n• 📅 Cara booking\n• ❓ Pertanyaan lainnya\n\nAda yang bisa aku bantu hari ini?',
   timestamp: new Date(),
 };
 
@@ -21,31 +21,50 @@ const QUICK_REPLIES = [
 ];
 
 function formatMessage(text) {
-  // Simple markdown-like formatting
-  return text
+  if (!text) return '';
+  let html = text
+    // Escape HTML first
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    // Bold **text**
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Italic *text*
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Bullet points: lines starting with - or •
+    .replace(/^[\-•]\s+(.+)$/gm, '<li>$1</li>')
+    // Numbered lists: lines starting with 1. 2. etc
+    .replace(/^\d+\.\s+(.+)$/gm, '<li>$1</li>')
+    // Wrap consecutive <li> in <ul>
+    .replace(/((?:<li>.*?<\/li>\n?)+)/g, '<ul class="moon-list">$1</ul>')
+    // Line breaks for remaining newlines
     .replace(/\n/g, '<br/>');
+  return html;
 }
 
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-1.5 px-4 py-3">
-      <div className="flex items-center gap-1">
-        <span className="moon-typing-dot w-2 h-2 rounded-full bg-amber-400" style={{ animationDelay: '0ms' }} />
-        <span className="moon-typing-dot w-2 h-2 rounded-full bg-amber-400" style={{ animationDelay: '150ms' }} />
-        <span className="moon-typing-dot w-2 h-2 rounded-full bg-amber-400" style={{ animationDelay: '300ms' }} />
+    <div className="flex items-start gap-2.5 moon-msg-appear">
+      <MoonAvatar />
+      <div className="bg-white dark:bg-slate-700 rounded-2xl rounded-bl-md border border-gray-100 dark:border-slate-600 px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
+            <span className="moon-typing-dot w-2 h-2 rounded-full bg-purple-400" style={{ animationDelay: '0ms' }} />
+            <span className="moon-typing-dot w-2 h-2 rounded-full bg-purple-400" style={{ animationDelay: '150ms' }} />
+            <span className="moon-typing-dot w-2 h-2 rounded-full bg-purple-400" style={{ animationDelay: '300ms' }} />
+          </div>
+        </div>
       </div>
-      <span className="text-xs text-gray-400 ml-1.5 italic">MOON sedang mengetik...</span>
     </div>
   );
 }
 
 function MoonAvatar({ size = 'sm' }) {
-  const dim = size === 'sm' ? 'w-7 h-7' : 'w-10 h-10';
+  const dim = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10';
+  const iconSize = size === 'sm' ? 14 : 18;
   return (
     <div className={`${dim} rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-amber-400 flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0`}>
-      <Moon size={size === 'sm' ? 14 : 18} className="text-white" />
+      <span className="text-white" style={{ fontSize: iconSize, lineHeight: 1 }}>🌙</span>
     </div>
   );
 }
@@ -54,17 +73,23 @@ function ChatMessage({ msg, isLatest }) {
   const isUser = msg.role === 'user';
 
   return (
-    <div className={`moon-msg-appear flex gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${isLatest ? 'moon-msg-latest' : ''}`}>
+    <div className={`moon-msg-appear flex items-end gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${isLatest ? 'moon-msg-latest' : ''}`}>
       {!isUser && <MoonAvatar />}
-      <div
-        className={`relative max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
-          isUser
-            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-br-md'
-            : 'bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-100 rounded-bl-md border border-gray-100 dark:border-slate-600'
-        }`}
-      >
-        <div dangerouslySetInnerHTML={{ __html: formatMessage(msg.text) }} />
-        <div className={`text-[10px] mt-1.5 ${isUser ? 'text-indigo-200' : 'text-gray-400 dark:text-gray-500'} text-right`}>
+
+      <div className={`max-w-[78%] ${isUser ? 'flex flex-col items-end' : ''}`}>
+        <div
+          className={`relative rounded-2xl px-4 py-3 text-[13.5px] leading-[1.65] shadow-sm ${
+            isUser
+              ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-br-sm'
+              : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-bl-sm border border-gray-100 dark:border-slate-600'
+          }`}
+        >
+          <div
+            className={`moon-msg-content ${isUser ? 'moon-msg-user' : 'moon-msg-assistant'}`}
+            dangerouslySetInnerHTML={{ __html: formatMessage(msg.text) }}
+          />
+        </div>
+        <div className={`text-[10px] mt-1 px-1 ${isUser ? 'text-gray-400' : 'text-gray-400 dark:text-gray-500'}`}>
           {new Date(msg.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
         </div>
       </div>
@@ -128,7 +153,7 @@ export default function MoonChat() {
     const history = messages
       .filter((m) => m.id !== 'welcome')
       .slice(-10)
-      .map((m) => ({ role: m.role === 'user' ? 'user' : 'model', text: m.text }));
+      .map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', text: m.text }));
 
     try {
       const res = await api.post('/moon/chat', {
@@ -181,34 +206,39 @@ export default function MoonChat() {
     <>
       {/* ── Chat Window ── */}
       <div
-        className={`fixed bottom-24 right-4 sm:right-6 z-[9999] transition-all duration-500 ease-out ${
+        className={`fixed bottom-24 right-4 sm:right-6 z-[9999] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           isOpen
             ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
-            : 'opacity-0 translate-y-8 scale-95 pointer-events-none'
+            : 'opacity-0 translate-y-4 scale-[0.97] pointer-events-none'
         }`}
       >
-        <div className="w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-8rem)] flex flex-col rounded-2xl shadow-2xl shadow-purple-900/20 overflow-hidden border border-gray-200 dark:border-slate-700 moon-chat-glass">
+        <div className="w-[370px] max-w-[calc(100vw-2rem)] h-[530px] max-h-[calc(100vh-8rem)] flex flex-col rounded-3xl shadow-2xl shadow-purple-900/25 overflow-hidden border border-white/20 dark:border-slate-700/80 moon-chat-glass">
+
           {/* ── Header ── */}
-          <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-700 px-4 py-3.5 flex items-center gap-3 shrink-0">
-            {/* Decorative stars */}
+          <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-700 px-5 py-4 flex items-center gap-3 shrink-0">
+            {/* Animated stars */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="moon-star absolute top-2 right-12 w-1 h-1 bg-white rounded-full opacity-60" />
-              <div className="moon-star absolute top-5 right-24 w-0.5 h-0.5 bg-white rounded-full opacity-40" style={{ animationDelay: '1s' }} />
-              <div className="moon-star absolute bottom-2 right-32 w-1 h-1 bg-amber-200 rounded-full opacity-50" style={{ animationDelay: '2s' }} />
-              <div className="moon-star absolute top-3 left-48 w-0.5 h-0.5 bg-white rounded-full opacity-30" style={{ animationDelay: '0.5s' }} />
+              <div className="moon-star absolute top-2 right-12 w-1 h-1 bg-white rounded-full" />
+              <div className="moon-star absolute top-5 right-24 w-0.5 h-0.5 bg-white rounded-full" style={{ animationDelay: '1s' }} />
+              <div className="moon-star absolute bottom-2 right-32 w-1 h-1 bg-amber-200 rounded-full" style={{ animationDelay: '2s' }} />
+              <div className="moon-star absolute top-3 left-48 w-0.5 h-0.5 bg-white rounded-full" style={{ animationDelay: '0.5s' }} />
+              <div className="moon-star absolute bottom-3 left-24 w-0.5 h-0.5 bg-amber-100 rounded-full" style={{ animationDelay: '1.5s' }} />
             </div>
 
             <MoonAvatar size="md" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
                 <h3 className="text-white font-bold text-base tracking-tight">MOON</h3>
-                <Sparkles size={14} className="text-amber-300" />
+                <Sparkles size={13} className="text-amber-300" />
               </div>
-              <p className="text-indigo-200 text-xs truncate">Asisten AI Studio Musik Lantai Atas</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="w-2 h-2 rounded-full bg-green-400 shadow-sm shadow-green-400/50" />
+                <p className="text-indigo-200 text-[11px]">Online • Siap membantu</p>
+              </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-lg text-indigo-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-indigo-200 hover:text-white hover:bg-white/15 transition-all duration-200 cursor-pointer"
               aria-label="Tutup chat"
             >
               <X size={18} />
@@ -219,7 +249,7 @@ export default function MoonChat() {
           <div
             ref={chatBodyRef}
             onScroll={handleScroll}
-            className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-gradient-to-b from-gray-50 to-white dark:from-slate-800 dark:to-slate-850 moon-chat-scrollbar"
+            className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-gradient-to-b from-slate-50 via-white to-gray-50/50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-850 moon-chat-scrollbar"
           >
             {messages.map((msg, i) => (
               <ChatMessage key={msg.id} msg={msg} isLatest={i === messages.length - 1} />
@@ -229,12 +259,12 @@ export default function MoonChat() {
 
             {/* Quick Replies — show only if no user interaction yet */}
             {!hasInteracted && messages.length === 1 && (
-              <div className="flex flex-wrap gap-2 pt-1 moon-msg-appear">
+              <div className="flex flex-wrap gap-2 pt-2 pl-10 moon-msg-appear">
                 {QUICK_REPLIES.map((qr) => (
                   <button
                     key={qr.label}
                     onClick={() => handleQuickReply(qr.message)}
-                    className="px-3 py-1.5 text-xs font-medium rounded-full border border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-800/40 transition-all duration-200 cursor-pointer hover:shadow-sm"
+                    className="px-3.5 py-2 text-xs font-medium rounded-xl border border-purple-200/80 dark:border-purple-700/60 text-purple-600 dark:text-purple-300 bg-white dark:bg-purple-900/20 hover:bg-purple-50 dark:hover:bg-purple-800/30 hover:border-purple-300 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
                   >
                     {qr.label}
                   </button>
@@ -249,7 +279,7 @@ export default function MoonChat() {
           {showScrollBtn && (
             <button
               onClick={() => scrollToBottom()}
-              className="absolute bottom-20 left-1/2 -translate-x-1/2 p-1.5 rounded-full bg-white dark:bg-slate-700 shadow-lg border border-gray-200 dark:border-slate-600 text-gray-500 hover:text-purple-500 transition-colors cursor-pointer z-10"
+              className="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 p-1.5 rounded-full bg-white dark:bg-slate-700 shadow-lg border border-gray-200 dark:border-slate-600 text-gray-500 hover:text-purple-500 transition-colors cursor-pointer z-10"
             >
               <ChevronDown size={16} />
             </button>
@@ -258,7 +288,7 @@ export default function MoonChat() {
           {/* ── Input Area ── */}
           <form
             onSubmit={handleSubmit}
-            className="shrink-0 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 flex items-end gap-2"
+            className="shrink-0 border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 flex items-end gap-2.5"
           >
             <textarea
               ref={inputRef}
@@ -267,17 +297,17 @@ export default function MoonChat() {
               onKeyDown={handleKeyDown}
               placeholder="Tanya MOON sesuatu..."
               rows={1}
-              className="flex-1 resize-none rounded-xl border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-3.5 py-2.5 text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all max-h-24"
-              style={{ minHeight: '40px' }}
+              className="flex-1 resize-none rounded-xl border border-gray-200 dark:border-slate-600 bg-gray-50/80 dark:bg-slate-700/80 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-purple-300 dark:focus:border-purple-500 transition-all max-h-24"
+              style={{ minHeight: '42px' }}
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className={`shrink-0 p-2.5 rounded-xl transition-all duration-200 cursor-pointer ${
+              className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer ${
                 input.trim() && !isLoading
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 hover:scale-105 active:scale-95'
-                  : 'bg-gray-100 dark:bg-slate-700 text-gray-400 cursor-not-allowed'
+                  ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 hover:scale-105 active:scale-95'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-300 dark:text-gray-500 cursor-not-allowed'
               }`}
               aria-label="Kirim pesan"
             >
@@ -286,9 +316,9 @@ export default function MoonChat() {
           </form>
 
           {/* ── Footer brand ── */}
-          <div className="shrink-0 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 px-3 py-1.5 text-center">
+          <div className="shrink-0 bg-gray-50/80 dark:bg-slate-800/80 px-3 py-1.5 text-center">
             <p className="text-[10px] text-gray-400 dark:text-gray-500">
-              Powered by <span className="font-medium text-purple-400">MOON AI</span> × Gemini ✨
+              Powered by <span className="font-semibold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">MOON AI</span> ✨
             </p>
           </div>
         </div>
@@ -310,8 +340,8 @@ export default function MoonChat() {
         {/* Main button */}
         <div className={`relative w-14 h-14 rounded-full shadow-xl transition-all duration-500 flex items-center justify-center ${
           isOpen
-            ? 'bg-gradient-to-r from-gray-600 to-gray-700 shadow-gray-500/30 rotate-90'
-            : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-600 shadow-purple-500/40 moon-fab-glow'
+            ? 'bg-gradient-to-br from-gray-600 to-gray-700 shadow-gray-500/30 rotate-90'
+            : 'bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-600 shadow-purple-500/40 moon-fab-glow'
         }`}>
           {isOpen ? (
             <X size={22} className="text-white transition-transform duration-300" />
@@ -333,11 +363,11 @@ export default function MoonChat() {
         {/* Tooltip */}
         {!isOpen && !hasInteracted && (
           <div className="absolute bottom-full right-0 mb-3 moon-tooltip-appear">
-            <div className="bg-white dark:bg-slate-700 rounded-xl shadow-xl border border-gray-200 dark:border-slate-600 px-4 py-2.5 whitespace-nowrap">
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-100">Hai! Butuh bantuan? 👋</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Chat dengan MOON 🌙</p>
+            <div className="bg-white dark:bg-slate-700 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-600 px-4 py-3 whitespace-nowrap">
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Hai! Butuh bantuan? 👋</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Chat dengan MOON 🌙</p>
               {/* Arrow */}
-              <div className="absolute -bottom-1.5 right-5 w-3 h-3 bg-white dark:bg-slate-700 border-r border-b border-gray-200 dark:border-slate-600 rotate-45" />
+              <div className="absolute -bottom-1.5 right-5 w-3 h-3 bg-white dark:bg-slate-700 border-r border-b border-gray-100 dark:border-slate-600 rotate-45" />
             </div>
           </div>
         )}
