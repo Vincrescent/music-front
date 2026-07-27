@@ -186,3 +186,83 @@ html.dark ::-webkit-scrollbar-thumb {
   animation: fade-in-up 0.8s ease-out both;
   animation-delay: 0.6s;
 }
+
+/* ─── MOON CHAT STYLES ─── */
+
+/* Glassmorphism background for chat window */
+.moon-chat-glass {
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(20px);
+}
+html.dark .moon-chat-glass {
+  background: rgba(15, 23, 42, 0.97);
+}
+
+/* Custom scrollbar for chat */
+.moon-chat-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.moon-chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.moon-chat-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 99px;
+}
+html.dark .moon-chat-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+/* Typing dots */
+@keyframes moon-typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+.moon-typing-dot {
+  animation: moon-typing 1.4s ease-in-out infinite;
+}
+
+/* Message appear animation */
+@keyframes moon-msg-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.moon-msg-appear {
+  animation: moon-msg-in 0.35s ease-out both;
+}
+
+/* Star twinkle animation */
+@keyframes moon-twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+.moon-star {
+  animation: moon-twinkle 3s ease-in-out infinite;
+}
+
+/* FAB glow effect */
+@keyframes moon-glow {
+  0%, 100% { box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3); }
+  50% { box-shadow: 0 4px 30px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.2); }
+}
+.moon-fab-glow {
+  animation: moon-glow 3s ease-in-out infinite;
+}
+
+/* Tooltip appear */
+@keyframes moon-tooltip-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.moon-tooltip-appear {
+  animation: moon-tooltip-in 0.5s ease-out 2s both;
+}
+
+/* Badge bounce */
+@keyframes moon-badge-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+.moon-badge-bounce {
+  animation: moon-badge-bounce 0.6s ease-out;
+}

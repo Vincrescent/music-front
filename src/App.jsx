@@ -7,6 +7,7 @@ import Facilities from './components/Facilities';
 import Equipment from './components/Equipment';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
+import MoonChat from './components/MoonChat';
 import BookingFlow from './components/booking/BookingFlow';
 
 const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
@@ -99,6 +100,7 @@ function AppContent() {
       <Equipment />
       <Testimonials />
       <Footer />
+      <MoonChat />
     </div>
   );
 }
