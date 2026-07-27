@@ -1,10 +1,55 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, Send, Sparkles, ChevronDown } from 'lucide-react';
-import api from '../utils/axiosConfig';
 
 /* ────────────────────────────────────────────────────────
    MOON 🌙 — AI Chat Assistant for Studio Musik Lantai Atas
+   Calls OpenRouter API directly from frontend
    ──────────────────────────────────────────────────────── */
+
+const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '';
+
+const SYSTEM_PROMPT = `Kamu adalah MOON 🌙, asisten AI virtual milik Studio Musik Lantai Atas. Kamu ramah, helpful, dan punya kepribadian yang hangat dengan sentuhan humor.
+
+TENTANG STUDIO MUSIK LANTAI ATAS:
+- Studio musik profesional yang berlokasi di Jakarta
+- Buka setiap hari dari jam 09:00 sampai 01:00 dini hari
+- Memiliki 4 studio dengan berbagai kapasitas dan harga
+
+DAFTAR STUDIO:
+1. Studio 1 — Kapasitas 10 orang, Full Head Cabinet, Backline Lengkap + AC + Air Minum. Harga: Rp 75.000 - 100.000/jam
+2. Studio 2 — Kapasitas 6 orang, Half Backline, Setengah Backline + AC + Air Minum. Harga: Rp 50.000 - 75.000/jam
+3. Studio 3 — Kapasitas 15 orang, Full Head Cabinet + Recording, Backline Lengkap + Rekaman + AC + Air Minum. Harga: Rp 100.000 - 150.000/jam
+4. Studio 4 — Kapasitas 4 orang, Acoustic, Setup Akustik + AC + Air Minum. Harga: Rp 40.000 - 60.000/jam
+
+FASILITAS:
+- Bilik Rekaman Kedap Suara (noise floor -20dB, kaca akustik tiga lapis)
+- Ruang Kontrol Mixing (Monitor Genelec 8351B, Universal Audio Apollo Interface)
+- Wi-Fi Kecepatan Tinggi (gigabit)
+- Minuman & Makanan Premium (kopi artisanal, camilan sehat)
+- Area Lounge dengan kursi ergonomis
+- Kontrol Suhu HVAC senyap
+- Akses smart-key 24/7 dengan CCTV
+- Daya listrik bersih (sirkuit ground terisolasi)
+- Loker penyimpanan alat ber-AC
+
+METODE PEMBAYARAN:
+- Transfer Bank (BCA / Mandiri / BNI)
+- E-Wallet
+- QRIS
+
+JAM OPERASIONAL SLOT:
+- Pagi: 09:00 - 11:00
+- Siang: 11:00 - 17:00 (slot 2 jam)
+- Sore & Malam: 17:00 - 01:00 (slot 2 jam)
+
+ATURAN KAMU:
+1. Jawab SELALU dalam Bahasa Indonesia kecuali user bertanya dalam bahasa lain
+2. Gunakan emoji sesekali untuk kesan ramah 🎵🎸🎤
+3. Jika ditanya hal di luar topik studio musik, tetap jawab dengan sopan tapi arahkan kembali ke layanan studio
+4. Sarankan user untuk menekan tombol "Pesan Sekarang" di website untuk booking
+5. Jangan pernah memberikan informasi yang tidak akurat tentang studio
+6. Jika tidak tahu jawabannya, akui dan sarankan untuk menghubungi langsung
+7. Selalu akhiri dengan sesuatu yang helpful atau ajakan untuk booking`;
 
 const WELCOME_MESSAGE = {
   id: 'welcome',
@@ -20,26 +65,60 @@ const QUICK_REPLIES = [
   { label: '💰 Harga', message: 'Berapa harga sewa studio per jam?' },
 ];
 
+/* ── Call OpenRouter directly ── */
+async function callMoonAI(userMessage, history) {
+  if (!OPENROUTER_KEY) {
+    return 'Maaf, MOON sedang tidak tersedia saat ini. Silakan hubungi kami langsung di studio. 🌙';
+  }
+
+  const messages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...history.map((m) => ({
+      role: m.role === 'user' ? 'user' : 'assistant',
+      content: m.text,
+    })),
+    { role: 'user', content: userMessage },
+  ];
+
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': window.location.origin,
+      'X-Title': 'Studio Musik Lantai Atas',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.0-flash-exp:free',
+      messages,
+      temperature: 0.7,
+      max_tokens: 1024,
+    }),
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => '');
+    console.error('OpenRouter error:', res.status, errBody);
+    throw new Error(`API error ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || 'Maaf, MOON tidak bisa memproses permintaan kamu saat ini. 🌙';
+}
+
+/* ── Helpers ── */
 function formatMessage(text) {
   if (!text) return '';
-  let html = text
-    // Escape HTML first
+  return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    // Bold **text**
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // Italic *text*
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Bullet points: lines starting with - or •
     .replace(/^[\-•]\s+(.+)$/gm, '<li>$1</li>')
-    // Numbered lists: lines starting with 1. 2. etc
     .replace(/^\d+\.\s+(.+)$/gm, '<li>$1</li>')
-    // Wrap consecutive <li> in <ul>
     .replace(/((?:<li>.*?<\/li>\n?)+)/g, '<ul class="moon-list">$1</ul>')
-    // Line breaks for remaining newlines
     .replace(/\n/g, '<br/>');
-  return html;
 }
 
 function TypingIndicator() {
@@ -47,12 +126,10 @@ function TypingIndicator() {
     <div className="flex items-start gap-2.5 moon-msg-appear">
       <MoonAvatar />
       <div className="bg-white dark:bg-slate-700 rounded-2xl rounded-bl-md border border-gray-100 dark:border-slate-600 px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-1.5">
-          <div className="flex items-center gap-1">
-            <span className="moon-typing-dot w-2 h-2 rounded-full bg-purple-400" style={{ animationDelay: '0ms' }} />
-            <span className="moon-typing-dot w-2 h-2 rounded-full bg-purple-400" style={{ animationDelay: '150ms' }} />
-            <span className="moon-typing-dot w-2 h-2 rounded-full bg-purple-400" style={{ animationDelay: '300ms' }} />
-          </div>
+        <div className="flex items-center gap-1">
+          <span className="moon-typing-dot w-2 h-2 rounded-full bg-purple-400" style={{ animationDelay: '0ms' }} />
+          <span className="moon-typing-dot w-2 h-2 rounded-full bg-purple-400" style={{ animationDelay: '150ms' }} />
+          <span className="moon-typing-dot w-2 h-2 rounded-full bg-purple-400" style={{ animationDelay: '300ms' }} />
         </div>
       </div>
     </div>
@@ -61,21 +138,19 @@ function TypingIndicator() {
 
 function MoonAvatar({ size = 'sm' }) {
   const dim = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10';
-  const iconSize = size === 'sm' ? 14 : 18;
+  const fs = size === 'sm' ? '14px' : '18px';
   return (
     <div className={`${dim} rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-amber-400 flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0`}>
-      <span className="text-white" style={{ fontSize: iconSize, lineHeight: 1 }}>🌙</span>
+      <span className="text-white" style={{ fontSize: fs, lineHeight: 1 }}>🌙</span>
     </div>
   );
 }
 
 function ChatMessage({ msg, isLatest }) {
   const isUser = msg.role === 'user';
-
   return (
     <div className={`moon-msg-appear flex items-end gap-2.5 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${isLatest ? 'moon-msg-latest' : ''}`}>
       {!isUser && <MoonAvatar />}
-
       <div className={`max-w-[78%] ${isUser ? 'flex flex-col items-end' : ''}`}>
         <div
           className={`relative rounded-2xl px-4 py-3 text-[13.5px] leading-[1.65] shadow-sm ${
@@ -97,6 +172,7 @@ function ChatMessage({ msg, isLatest }) {
   );
 }
 
+/* ── Main Component ── */
 export default function MoonChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
@@ -110,7 +186,6 @@ export default function MoonChat() {
   const chatBodyRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Auto-scroll to bottom
   const scrollToBottom = useCallback((smooth = true) => {
     messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' });
   }, []);
@@ -127,7 +202,6 @@ export default function MoonChat() {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // Detect if user scrolled up
   const handleScroll = () => {
     if (!chatBodyRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = chatBodyRef.current;
@@ -149,38 +223,32 @@ export default function MoonChat() {
     setIsLoading(true);
     setHasInteracted(true);
 
-    // Build history for context (last 10 messages)
+    // Last 10 messages for context
     const history = messages
       .filter((m) => m.id !== 'welcome')
-      .slice(-10)
-      .map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', text: m.text }));
+      .slice(-10);
 
     try {
-      const res = await api.post('/moon/chat', {
-        message: text.trim(),
-        history,
-      });
-
+      const reply = await callMoonAI(text.trim(), history);
       const assistantMsg = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        text: res.data.reply,
+        text: reply,
         timestamp: new Date(),
       };
-
       setMessages((prev) => [...prev, assistantMsg]);
-
-      if (!isOpen) {
-        setUnreadCount((c) => c + 1);
-      }
+      if (!isOpen) setUnreadCount((c) => c + 1);
     } catch (err) {
-      const errorMsg = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        text: 'Maaf, terjadi kesalahan koneksi. Coba lagi nanti ya! 🌙',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMsg]);
+      console.error('MOON error:', err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          text: 'Maaf, terjadi kesalahan koneksi. Coba lagi nanti ya! 🌙',
+          timestamp: new Date(),
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -189,10 +257,6 @@ export default function MoonChat() {
   const handleSubmit = (e) => {
     e.preventDefault();
     sendMessage(input);
-  };
-
-  const handleQuickReply = (message) => {
-    sendMessage(message);
   };
 
   const handleKeyDown = (e) => {
@@ -216,7 +280,6 @@ export default function MoonChat() {
 
           {/* ── Header ── */}
           <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-700 px-5 py-4 flex items-center gap-3 shrink-0">
-            {/* Animated stars */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="moon-star absolute top-2 right-12 w-1 h-1 bg-white rounded-full" />
               <div className="moon-star absolute top-5 right-24 w-0.5 h-0.5 bg-white rounded-full" style={{ animationDelay: '1s' }} />
@@ -224,7 +287,6 @@ export default function MoonChat() {
               <div className="moon-star absolute top-3 left-48 w-0.5 h-0.5 bg-white rounded-full" style={{ animationDelay: '0.5s' }} />
               <div className="moon-star absolute bottom-3 left-24 w-0.5 h-0.5 bg-amber-100 rounded-full" style={{ animationDelay: '1.5s' }} />
             </div>
-
             <MoonAvatar size="md" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
@@ -254,16 +316,13 @@ export default function MoonChat() {
             {messages.map((msg, i) => (
               <ChatMessage key={msg.id} msg={msg} isLatest={i === messages.length - 1} />
             ))}
-
             {isLoading && <TypingIndicator />}
-
-            {/* Quick Replies — show only if no user interaction yet */}
             {!hasInteracted && messages.length === 1 && (
               <div className="flex flex-wrap gap-2 pt-2 pl-10 moon-msg-appear">
                 {QUICK_REPLIES.map((qr) => (
                   <button
                     key={qr.label}
-                    onClick={() => handleQuickReply(qr.message)}
+                    onClick={() => sendMessage(qr.message)}
                     className="px-3.5 py-2 text-xs font-medium rounded-xl border border-purple-200/80 dark:border-purple-700/60 text-purple-600 dark:text-purple-300 bg-white dark:bg-purple-900/20 hover:bg-purple-50 dark:hover:bg-purple-800/30 hover:border-purple-300 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
                   >
                     {qr.label}
@@ -271,11 +330,9 @@ export default function MoonChat() {
                 ))}
               </div>
             )}
-
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Scroll to bottom button */}
           {showScrollBtn && (
             <button
               onClick={() => scrollToBottom()}
@@ -315,7 +372,7 @@ export default function MoonChat() {
             </button>
           </form>
 
-          {/* ── Footer brand ── */}
+          {/* ── Footer ── */}
           <div className="shrink-0 bg-gray-50/80 dark:bg-slate-800/80 px-3 py-1.5 text-center">
             <p className="text-[10px] text-gray-400 dark:text-gray-500">
               Powered by <span className="font-semibold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">MOON AI</span> ✨
@@ -324,7 +381,7 @@ export default function MoonChat() {
         </div>
       </div>
 
-      {/* ── Floating Action Button ── */}
+      {/* ── FAB ── */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 right-4 sm:right-6 z-[9999] group cursor-pointer transition-all duration-300 ${
@@ -332,12 +389,9 @@ export default function MoonChat() {
         }`}
         aria-label={isOpen ? 'Tutup MOON Chat' : 'Buka MOON Chat'}
       >
-        {/* Pulse ring */}
         {!isOpen && !hasInteracted && (
           <span className="absolute inset-0 rounded-full bg-purple-500 animate-ping opacity-20" />
         )}
-
-        {/* Main button */}
         <div className={`relative w-14 h-14 rounded-full shadow-xl transition-all duration-500 flex items-center justify-center ${
           isOpen
             ? 'bg-gradient-to-br from-gray-600 to-gray-700 shadow-gray-500/30 rotate-90'
@@ -352,21 +406,16 @@ export default function MoonChat() {
             </div>
           )}
         </div>
-
-        {/* Unread badge */}
         {unreadCount > 0 && !isOpen && (
           <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-lg moon-badge-bounce">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
-
-        {/* Tooltip */}
         {!isOpen && !hasInteracted && (
           <div className="absolute bottom-full right-0 mb-3 moon-tooltip-appear">
             <div className="bg-white dark:bg-slate-700 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-600 px-4 py-3 whitespace-nowrap">
               <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Hai! Butuh bantuan? 👋</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Chat dengan MOON 🌙</p>
-              {/* Arrow */}
               <div className="absolute -bottom-1.5 right-5 w-3 h-3 bg-white dark:bg-slate-700 border-r border-b border-gray-100 dark:border-slate-600 rotate-45" />
             </div>
           </div>
