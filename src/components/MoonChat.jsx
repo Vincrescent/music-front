@@ -66,10 +66,28 @@ const QUICK_REPLIES = [
   { label: '💰 Harga', message: 'Berapa harga sewa studio per jam?' },
 ];
 
-/* ── Call OpenRouter directly ── */
+/* Smart offline response generator if API fails */
+function getOfflineMoonResponse(userMessage) {
+  const msg = userMessage.toLowerCase();
+  if (msg.includes('studio') || msg.includes('kamar') || msg.includes('tipe')) {
+    return 'Studio Musik Lantai Atas punya 4 pilihan studio:\n• **Studio 1**: 10 orang, Full Head Cabinet (Rp 75k - 100k/jam)\n• **Studio 2**: 6 orang, Half Backline (Rp 50k - 75k/jam)\n• **Studio 3**: 15 orang, Full Head + Recording (Rp 100k - 150k/jam)\n• **Studio 4**: 4 orang, Acoustic (Rp 40k - 60k/jam)\n\nSilakan klik **Pesan Sekarang** untuk reservasi! 🎵';
+  }
+  if (msg.includes('harga') || msg.includes('biaya') || msg.includes('tarif') || msg.includes('bayar')) {
+    return 'Harga sewa studio kami sangat terjangkau mulai dari **Rp 40.000/jam** (Studio 4 Akustik) hingga **Rp 150.000/jam** (Studio 3 Recording). Kami menerima pembayaran via Transfer Bank (BCA, Mandiri, BNI), E-Wallet, & QRIS! 💰';
+  }
+  if (msg.includes('fasilitas') || msg.includes('alat') || msg.includes('spek') || msg.includes('mic')) {
+    return 'Fasilitas premium kami meliputi:\n• Bilik Rekaman Kedap Suara (-20dB floor)\n• Ruang Control Mixing dengan Genelec 8351B & Universal Audio Apollo\n• Wi-Fi Gigabit & Lounge nyaman\n• HVAC Senyap & Smart Access 24/7 🎧';
+  }
+  if (msg.includes('book') || msg.includes('pesan') || msg.includes('sewa') || msg.includes('jadwal') || msg.includes('slot')) {
+    return 'Untuk pesan studio sangat mudah! 😊\n1. Klik tombol **Pesan Sekarang** di bagian atas menu.\n2. Pilih studio dan tanggal yang diinginkan.\n3. Pilih jam slot latihan & lakukan pembayaran.\n4. Konfirmasi booking kamu!';
+  }
+  return 'Halo! Aku MOON 🌙. Ada yang bisa aku bantu seputar sewa studio, harga, fasilitas, atau jadwal booking di Studio Musik Lantai Atas? 🎵';
+}
+
+/* ── Call OpenRouter with Model Fallbacks ── */
 async function callMoonAI(userMessage, history) {
   if (!OPENROUTER_KEY) {
-    return 'Maaf, MOON sedang tidak tersedia saat ini. Silakan hubungi kami langsung di studio. 🌙';
+    return getOfflineMoonResponse(userMessage);
   }
 
   const messages = [
@@ -81,30 +99,50 @@ async function callMoonAI(userMessage, history) {
     { role: 'user', content: userMessage },
   ];
 
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENROUTER_KEY}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': window.location.origin,
-      'X-Title': 'Studio Musik Lantai Atas',
-    },
-    body: JSON.stringify({
-      model: 'google/gemini-2.0-flash-exp:free',
-      messages,
-      temperature: 0.7,
-      max_tokens: 1024,
-    }),
-  });
+  // Try list of reliable free model endpoints on OpenRouter
+  const candidateModels = [
+    'deepseek/deepseek-r1:free',
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'google/gemini-2.0-flash-lite-preview-02-05:free',
+    'mistralai/mistral-7b-instruct:free',
+    'openrouter/auto',
+  ];
 
-  if (!res.ok) {
-    const errBody = await res.text().catch(() => '');
-    console.error('OpenRouter error:', res.status, errBody);
-    throw new Error(`API error ${res.status}`);
+  for (const model of candidateModels) {
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENROUTER_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'Studio Musik Lantai Atas',
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.7,
+          max_tokens: 1024,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content;
+        if (text && text.trim()) {
+          return text;
+        }
+      } else {
+        const errText = await res.text().catch(() => '');
+        console.warn(`Model ${model} returned ${res.status}:`, errText);
+      }
+    } catch (e) {
+      console.warn(`Model ${model} fetch failed:`, e);
+    }
   }
 
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content || 'Maaf, MOON tidak bisa memproses permintaan kamu saat ini. 🌙';
+  // If all API calls fail, return smart local answer instead of error
+  return getOfflineMoonResponse(userMessage);
 }
 
 /* ── Helpers ── */
