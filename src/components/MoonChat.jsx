@@ -113,10 +113,8 @@ async function callMoonAI(userMessage, history) {
       const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${OPENROUTER_KEY}`,
+          'Authorization': `Bearer ${OPENROUTER_KEY.trim()}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'Studio Musik Lantai Atas',
         },
         body: JSON.stringify({
           model,
